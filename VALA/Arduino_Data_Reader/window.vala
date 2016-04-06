@@ -29,13 +29,6 @@ class SensorIRDist : ArduSensor {
 			
 		this.show_all();
 	}
-	
-	public static void autocreate_sensor(SensorWindow source, uint8[] ident) {
-		stdout.printf("Creating sensor type: " + ((string)ident)[0:2] + "\n");	
-		if(((string)ident)[0:2] == "DS") {			
-			source.add_new_sensor(new SensorIRDist(source.arduComs, ident[2]));
-		}
-	}
 }
 
 class SensorJS : ArduSensor {
@@ -55,11 +48,6 @@ class SensorJS : ArduSensor {
 			} );
 			
 		this.show_all();
-	}
-	
-	public static void autocreate_sensor(SensorWindow source, uint8[] ident) {
-		if((string)ident[0:1] == "JS")			
-			source.add_new_sensor(new SensorJS(source.arduComs, ident[2]));
 	}
 }
 
@@ -82,8 +70,7 @@ class ArduWindow : Gtk.Application {
 		
 		outputBox = new SensorWindow(arduConnection);
 		
-		outputBox.create_new_sensor.connect(SensorIRDist.autocreate_sensor);		
-		outputBox.create_new_sensor.connect(SensorJS.autocreate_sensor);	
+		outputBox.add_new_sensor( (intf, num) => { return new SensorIRDist(intf, num); }, "DS");
 				
 		window.add(outputBox);
 		window.show_all();

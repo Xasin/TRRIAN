@@ -1,12 +1,14 @@
+delegate ArduSensor sensor_constructor(ArduinoInterface comsInterface, uint8 number);
+
 class SensorWindow : Gtk.Bin {
 	
 	public ArduinoInterface arduComs {public get; private set;}
 	private ArduSensor[] sensors;
 	
-	private Gtk.ListBox dispBox;
+	public signal void create_new_sensor(uint8[] data);
 	
-	private sensorType[] typeList;
-		
+	private Gtk.ListBox dispBox;
+			
 	public SensorWindow(ArduinoInterface coms) {
 		this.arduComs = coms;
 		
@@ -24,8 +26,10 @@ class SensorWindow : Gtk.Bin {
 		});
 	}
 	
-	public void add_new_sensor(ArduSensor newSensor) {
-		this.dispBox.add(newSensor);
-		this.sensors += newSensor;
+	public void add_new_sensor(sensor_constructor c, string ident) {
+		this.create_new_sensor.connect( (data) => {			
+			if(((string)data)[0:ident.length] == ident)
+				dispBox.add(c(arduComs, data[ident.length]) );
+		} );
 	}
 }
