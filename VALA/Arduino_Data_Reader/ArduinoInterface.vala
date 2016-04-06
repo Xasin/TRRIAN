@@ -1,10 +1,10 @@
 class ArduinoInterface {
 	Posix.FILE arduinoInterface;
 	
-	public signal void on_packet_received();
+	public signal void on_packet_received(uint8[] data);
 	
 	private int64 lastTransmit = int64.MAX;
-	private int64 packetTimeout = 5000;
+	private int64 packetTimeout;
 	
 	private uint 	bufSize;	
 	private uint8[] buf;
@@ -14,24 +14,24 @@ class ArduinoInterface {
 		
 	private void read_in_byte() {
 		int b = 0;
-		
-		while((b = arduinoInterface.getc() ) == Posix.FILE.EOF) { 
-			Thread.usleep(1000);
-			
-			if(lastTransmit < get_monotonic_time() - this.packetTimeout) {
-				this.on_packet_received();
-				this.clear();
-				
-				this.lastTransmit = int64.MAX;
-			}
+		if((b = arduinoInterface.getc()) != Posix.FILE.EOF) {
+			buf[writePos++] = (uint8)b;
+			if(writePos == bufSize) writePos = 0; 
+						
+			lastTransmit = get_monotonic_time();
 		}
+	}
+	
+	private void call_packet_received() {
+		uint8[] data = new uint8[0];
 		
-		lastTransmit = get_monotonic_time();
+		while(this.get_available() > 0)
+			data += this.getc();
 		
-		buf[writePos++] = (uint8)b;
-		if(writePos == bufSize) writePos = 0; 
+		this.on_packet_received(data);
 		
-		stdout.printf("Rec: " + b.to_string() + "\n");
+		this.clear();
+		this.lastTransmit = int64.MAX;
 	}
 	
 	public void clear() {
@@ -71,15 +71,35 @@ class ArduinoInterface {
 			return -1;
 	}
 	
-	public ArduinoInterface(string port, int baudrate = 9600, int64 packetTimeout = 5000, int buffer_size = 100) {
-		arduinoInterface = Posix.FILE.open(port, "r");
+	public ArduinoInterface(string port, Posix.speed_t baudrate = Posix.B9600, int64 packetTimeout = 5000, int buffer_size = 100) {
+		
+		var handle = Posix.open (port, Posix.O_RDWR | Posix.O_NOCTTY | Posix.LOG_NDELAY);
+		
+		Posix.termios termios;
+		Posix.tcgetattr(handle, out termios);
+		
+		Posix.cfsetispeed (ref termios, baudrate);
+		Posix.cfsetospeed (ref termios, baudrate);
+		
+		Posix.tcsetattr (handle, Posix.TCSAFLUSH, termios);
+		
+		arduinoInterface = Posix.FILE.fdopen(handle, "rw");
 		
 		buf = new uint8[buffer_size];
 		bufSize = buffer_size;
 		
 		this.packetTimeout = packetTimeout;
 		
-		Thread<void*> arduino_reading_thread = new Thread<void*> ("Arduino reading thread", () => { while(true) { this.read_in_byte(); } } );
+		Thread<void*> arduino_reading_thread = new Thread<void*> ("Arduino reading thread", () => { 
+			while(true) { 
+				this.read_in_byte(); 
+				
+				if(this.lastTransmit < (get_monotonic_time() - this.packetTimeout)) {
+					this.call_packet_received();
+				}
+				
+				Thread.usleep(100);
+			} } );
 	}
 		
 }
@@ -88,11 +108,19 @@ int main() {
 	
 	var sensorduino = new ArduinoInterface("/dev/ttyACM0");
 	
-	sensorduino.on_packet_received.connect( () => { 
-			stdout.printf("Pin: " + sensorduino.getc().to_string() + " - Value: " + ((int16)(sensorduino.getc() * 256 + sensorduino.getc())).to_string() + "\n");
+	sensorduino.on_packet_received.connect( (data) => { 
+		if(data[0] == 'J' && data[1] == 'S')
+			stdout.printf("JS1: " + (data[2] * 256 + data[3]).to_string() + " JS2: " + (data[4] * 256 + data[5]).to_string() + " BTN: " + data[6].to_string() + "\n");
 	} );
 	
+	sensorduino.on_packet_received.connect( (data) => {
+		if(data[0] == 'D' && data[1] == 'S')
+			stdout.printf("Distance-Sensor " + data[2].to_string() + ": " + (4.0 * 600.0 / (float)(data[3] * 256 + data[4])).to_string() + "\n");
+	} );
+	
+	
 	while(true) {
+		Thread.usleep(1000);
 	}
 	
 	return 0;
