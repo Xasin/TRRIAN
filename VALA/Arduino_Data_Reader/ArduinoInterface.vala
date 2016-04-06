@@ -103,25 +103,3 @@ class ArduinoInterface {
 	}
 		
 }
-
-int main() {
-	
-	var sensorduino = new ArduinoInterface("/dev/ttyACM0");
-	
-	sensorduino.on_packet_received.connect( (data) => { 
-		if(data[0] == 'J' && data[1] == 'S')
-			stdout.printf("JS1: " + (data[2] * 256 + data[3]).to_string() + " JS2: " + (data[4] * 256 + data[5]).to_string() + " BTN: " + data[6].to_string() + "\n");
-	} );
-	
-	sensorduino.on_packet_received.connect( (data) => {
-		if(data[0] == 'D' && data[1] == 'S')
-			stdout.printf("Distance-Sensor " + data[2].to_string() + ": " + (4.0 * 600.0 / (float)(data[3] * 256 + data[4])).to_string() + "\n");
-	} );
-	
-	
-	while(true) {
-		Thread.usleep(1000);
-	}
-	
-	return 0;
-}
