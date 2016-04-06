@@ -7,7 +7,7 @@ class ArduSensor : Gtk.Bin {
 	}
 	
 	public bool matches_ident(uint8[] data) {
-		return ((string)data)[0:3] == (ident + ((char)num).to_string());
+		return ((string)data)[0:2] == (ident + ((char)num).to_string())[0:2];
 	}		
 }
 
@@ -70,7 +70,7 @@ class ArduWindow : Gtk.Application {
 		
 		outputBox = new SensorWindow(arduConnection);
 		
-		outputBox.add_new_sensor( (intf, num) => { return new SensorIRDist(intf, num); }, "DS");
+		outputBox.add_new_sensor( (intf,num) => { return new SensorIRDist(intf, num); }, "DS");
 				
 		window.add(outputBox);
 		window.show_all();

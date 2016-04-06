@@ -28,8 +28,8 @@ class SensorWindow : Gtk.Bin {
 	
 	public void add_new_sensor(sensor_constructor c, string ident) {
 		this.create_new_sensor.connect( (data) => {			
-			if(((string)data)[0:ident.length] == ident)
-				dispBox.add(c(arduComs, data[ident.length]) );
+			if(((string)data)[0:1] == ident[0:1])
+				dispBox.add(c(arduComs, data[ident.length+1]));
 		} );
 	}
 }
