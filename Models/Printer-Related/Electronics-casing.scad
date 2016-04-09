@@ -2,6 +2,9 @@ $mountWallThickness = 1.5;
 
 // boardStuff array consisting of: [[width, height], [p1 X, p1Y], etc...]
 
+//Config value to change the screw hole size so that the printer doesn't make them too small.
+screwHoleCompensation = 0.2;
+
 megaPosition = [[0, 70], 0];
 raspiPosition = [[85, 56], 180];
 
@@ -14,9 +17,9 @@ shellWall = 0.8;
 fanSize = [30, 30, 10];
 fanPosition = [	[107, 13, 13], 72];
 
-cutoutCubes = [	[[15, 18], [-shellOffset + 2.5, 3, boardMountHeight], 90],
- 								[[15, 18], [-shellOffset + 2.5, 3 + 18, boardMountHeight], 90],
-								[[13, 11], [-shellOffset + 2.5, 70 + 32, boardMountHeight + 1.5], 90],
+cutoutCubes = [	[[17, 18], [-shellOffset + 2.5, 1, boardMountHeight], 90],
+ 								[[17, 18], [-shellOffset + 2.5, 3 + 18, boardMountHeight], 90],
+								[[14, 12], [-shellOffset + 2.5, 70 + 31.5, boardMountHeight + 1], 90],
 								[[21, 15], [-shellOffset + 2.5, 70 - 5, boardMountHeight + 14], 90],
 								[[15, 9],  [123, 70 + 32, 30], 90],
 								[[15, 9],  [123, 70 + 32 - 13 - 9, 30], 90],
@@ -45,9 +48,9 @@ raspiBoard = [	[85, 56],
 
 module mountPin() {
 	difference() {
-		circle (d = 3 + $mountWallThickness *2);
+		circle (d = 3 + screwHoleCompensation*2 + $mountWallThickness *2);
 
-		circle (d = 3);
+		circle (d = 3 + screwHoleCompensation*2 );
 	}
 }
 
@@ -59,7 +62,7 @@ module eBoard(boardStuff) {
 	}
 	else if($mode == "CUTOUT_MOUNTS") {
 		for(i=[1:len(boardStuff)-1]) {
-			translate(boardStuff[i]) circle(d = 3);
+			translate(boardStuff[i]) circle(d = 3 + screwHoleCompensation*2 );
 		}
 	}
 	else if($mode == "OUTLINE") {
