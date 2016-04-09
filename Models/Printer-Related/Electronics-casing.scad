@@ -1,18 +1,31 @@
-$mountWallThickness = 1;
+$mountWallThickness = 1.5;
 
 // boardStuff array consisting of: [[width, height], [p1 X, p1Y], etc...]
 
-megaPosition = [[0, 65], 0];
+megaPosition = [[0, 70], 0];
 raspiPosition = [[85, 56], 180];
 
 boardMountHeight = 6;
 boardHeight = 50;
 
-shellOffset = 10;
-shellWall = 1;
+shellOffset = 15;
+shellWall = 1.2;
 
 fanSize = [30, 30, 10];
-fanPosition = [	[102, 13, 13], 72];
+fanPosition = [	[107, 13, 13], 72];
+
+cutoutCubes = [	[[15, 18], [-shellOffset + 2.5, 3, boardMountHeight], 90],
+ 								[[15, 18], [-shellOffset + 2.5, 3 + 18, boardMountHeight], 90],
+								[[13, 11], [-shellOffset + 2.5, 70 + 32, boardMountHeight + 1.5], 90],
+								[[21, 15], [-shellOffset + 2.5, 70 - 5, boardMountHeight + 14], 90],
+								[[15, 9],  [123, 70 + 32, 30], 90],
+								[[15, 9],  [123, 70 + 32 - 13 - 9, 30], 90],
+								[[10, 10],	 [25, 135, 30], 0],
+								[[10, 10],	 [68, 135, 30], 0]];
+
+
+lidMountPositions = [	[[0, - 12], 90], [[80, -12], 90],
+											[[0, 135.5], -90], [[105, 135.5], -90]];
 
 caseHeight = boardMountHeight + boardHeight;
 
@@ -73,8 +86,45 @@ module fanVentilation() {
 	difference() {
 		children();
 
-		translate(fanPosition[0]) rotate([0, 0, fanPosition[1]]) for(i=[0:fanSize[2]]) translate([fanSize[0] / fanSize[2] * i, 0, 0]) cube([fanSize[0] / fanSize[2] /2, 5, fanSize[1]]);
+		#translate(fanPosition[0]) rotate([0, 0, fanPosition[1]]) for(i=[0:fanSize[2]]) translate([fanSize[0] / fanSize[2] * i, 0, 0]) cube([fanSize[0] / fanSize[2] /2, 5, fanSize[1]]);
 	}
+}
+
+module cutCubes() {
+	difference() {
+		children();
+
+		#for(i=[0: len(cutoutCubes) - 1])
+			translate(cutoutCubes[i][1])
+			rotate([0, 0, cutoutCubes[i][2]])
+			cube([cutoutCubes[i][0][0], 5, cutoutCubes[i][0][1]]);
+	}
+}
+
+module lidMount() {
+	$fs = 0.5;
+	translate([0, 0, -7])
+	difference() {
+		union() {
+			cylinder(d = 3 + $mountWallThickness*2, h = 7);
+			translate([-1.5 - $mountWallThickness, -1.5 - $mountWallThickness, 0]) cube([1.5 + $mountWallThickness, 3 + $mountWallThickness * 2, 7]);
+		}
+		cylinder(d = 3, h = 10);
+
+		translate([-1.5 - $mountWallThickness, -5, 0]) rotate([0, 45, 0]) cube([10, 10, 10]);
+	}
+}
+
+module lidMounts() {
+	translate([0, 0, caseHeight - shellWall])
+	for(i=[0:len(lidMountPositions) -1]) translate(lidMountPositions[i][0]) rotate([0, 0, lidMountPositions[i][1]]) lidMount();
+}
+
+module lid() {
+		linear_extrude(height = shellWall, convexity = 2) difference() {
+			shell2D(r = shellOffset);
+			for(i=[0:len(lidMountPositions) - 1]) translate(lidMountPositions[i][0]) circle(d = 3, $fn = 10);
+		}
 }
 
 module baseCase() {
@@ -86,8 +136,11 @@ module baseCase() {
 
 module baseCaseRefined() {
 	fanVentilation()
+	cutCubes()
 
 	baseCase();
+
+	lidMounts();
 }
 
 baseCaseRefined();
