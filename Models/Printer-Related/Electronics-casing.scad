@@ -9,7 +9,7 @@ boardMountHeight = 6;
 boardHeight = 50;
 
 shellOffset = 15;
-shellWall = 1.2;
+shellWall = 0.8;
 
 fanSize = [30, 30, 10];
 fanPosition = [	[107, 13, 13], 72];
@@ -54,7 +54,12 @@ module mountPin() {
 module eBoard(boardStuff) {
 	if($mode == "MOUNTS") {
 		for(i=[1:len(boardStuff)-1]) {
-			translate(boardStuff[i]) mountPin();
+			translate(boardStuff[i]) mountPin();	
+		}
+	}
+	else if($mode == "CUTOUT_MOUNTS") {
+		for(i=[1:len(boardStuff)-1]) {
+			translate(boardStuff[i]) circle(d = 3);
 		}
 	}
 	else if($mode == "OUTLINE") {
@@ -128,10 +133,15 @@ module lid() {
 }
 
 module baseCase() {
-	basePlatform();
-	shell(caseHeight);
+	difference() {
+		union() {
+			basePlatform();
+			shell(caseHeight);
 
-	linear_extrude(height = boardMountHeight) boards($mode = "MOUNTS", $fs = 0.5);
+			linear_extrude(height = boardMountHeight) boards($mode = "MOUNTS", $fs = 0.5);
+		}
+		linear_extrude(height = boardMountHeight) boards($mode = "CUTOUT_MOUNTS", $fs = 0.5);
+	}
 }
 
 module baseCaseRefined() {
