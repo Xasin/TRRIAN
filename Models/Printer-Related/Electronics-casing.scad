@@ -8,6 +8,10 @@ screwHoleCompensation = 0.2;
 megaPosition = [[0, 70], 0];
 raspiPosition = [[85, 56], 180];
 
+// Lid variables
+lidFan = [ [57, 97, 0], 60, 50];
+
+// Case variables
 boardMountHeight = 6;
 boardHeight = 50;
 
@@ -19,12 +23,12 @@ fanPosition = [	[107, 13, 13], 72];
 
 cutoutCubes = [	[[17, 18], [-shellOffset + 2.5, 1, boardMountHeight], 90],
  								[[17, 18], [-shellOffset + 2.5, 3 + 18, boardMountHeight], 90],
-								[[14, 12], [-shellOffset + 2.5, 70 + 31.5, boardMountHeight + 1], 90],
-								[[21, 15], [-shellOffset + 2.5, 70 - 5, boardMountHeight + 14], 90],
-								[[15, 9],  [123, 70 + 32, 30], 90],
-								[[15, 9],  [123, 70 + 32 - 13 - 9, 30], 90],
-								[[10, 10],	 [25, 135, 30], 0],
-								[[10, 10],	 [68, 135, 30], 0]];
+								[[15, 13], [-shellOffset + 2.5, 70 + 31.5, boardMountHeight + 1], 90],
+								[[22, 16], [-shellOffset + 2, 70 - 5.5, boardMountHeight + 13.5], 90],
+								[[17, 9],  [123, 70 + 32, 30], 90],
+								[[17, 9],  [123, 70 + 32 - 13 - 9, 30], 90],
+								[[15, 11],	 [25, 135, 30], 0],
+								[[15, 11],	 [68, 135, 30], 0]];
 
 
 lidMountPositions = [	[[0, - 12], 90], [[80, -12], 90],
@@ -34,12 +38,12 @@ caseHeight = boardMountHeight + boardHeight;
 
 baseHeight = shellWall;
 
+
 megaBoard = [ [105.6, 53.34],
 							[13.97, 2.54],
 							[96.52, 2.54],
 							[90.17, 50.8],
 							[15.24, 50.8]];
-
 raspiBoard = [	[85, 56],
 								[3.5, 3.5],
 								[3.5, 52.5],
@@ -135,6 +139,29 @@ module lid() {
 		}
 }
 
+module lidFan() {
+	fanBeamThickness = 1.5;
+	
+	difference() {
+		children();
+		
+		translate(lidFan[0] + [0, 0, -1]) {
+			
+			difference() {
+				cylinder(d = lidFan[1], h = 10);
+				for(i=[0:15:360]) rotate([0, 0, i]) translate([-fanBeamThickness/2, 0, 0]) cube([fanBeamThickness, 50, 10]);
+			}
+			
+			for(i=[0:90:360]) rotate([0, 0, i]) translate([lidFan[2] /2, lidFan[2]/2, 0]) cylinder(d= 3+ screwHoleCompensation*2, h = 10, $fn = 9);
+		}
+	}
+}
+
+module lidRefined() {
+	lidFan()
+	lid();
+}
+	
 module baseCase() {
 	difference() {
 		union() {
@@ -156,4 +183,4 @@ module baseCaseRefined() {
 	lidMounts();
 }
 
-baseCaseRefined();
+lidRefined();
