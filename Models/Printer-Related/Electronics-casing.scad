@@ -16,7 +16,7 @@ boardMountHeight = 6;
 boardHeight = 50;
 
 shellOffset = 15;
-shellWall = 0.8;
+shellWall = 1.5;
 
 fanSize = [30, 30, 10];
 fanPosition = [	[107, 13, 13], 72];
@@ -183,4 +183,4 @@ module baseCaseRefined() {
 	lidMounts();
 }
 
-lidRefined();
+baseCaseRefined();
