@@ -24,11 +24,14 @@ module fanMount() {
 }
 
 module coolerMount() {
-	translate([7.3, 15, 3.25]) rotate([-90, 0, 0]) armEnd();
+	headXTranslate = 13;
+	headYTranslate = 10;
 	
-	translate([0, 9, 0]) cube([7.3 + 3.25, 6, 3]);
+	translate([headYTranslate, headXTranslate, 3.25]) rotate([-90, 0, 0]) armEnd();
 	
-	translate([-3, 0, 0]) cube([6, 15, 3]);
+	translate([0, headXTranslate - 6, 0]) cube([headYTranslate + 3.25, 6, 3]);
+	
+	translate([-3, 0, 0]) cube([6, headXTranslate, 3]);
 }
 
 
