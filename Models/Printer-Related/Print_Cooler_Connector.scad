@@ -25,7 +25,7 @@ module fanMount() {
 
 module coolerMount() {
 	headXTranslate = 13;
-	headYTranslate = 10;
+	headYTranslate = 12;
 	
 	translate([headYTranslate, headXTranslate, 3.25]) rotate([-90, 0, 0]) armEnd();
 	
