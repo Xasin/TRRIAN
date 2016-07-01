@@ -2,11 +2,11 @@ function dir_offset(rotation)
    if(rotation == 0) then
       return 1, 0;
    elseif(rotation == 1) then
-      return 0, -1;
+      return 0, 1;
    elseif(rotation == 2) then
       return -1, 0;
    else
-      return 0, 1;
+      return 0, -1;
    end
 end
 

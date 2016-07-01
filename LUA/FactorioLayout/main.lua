@@ -1,3 +1,4 @@
+
 print("\nLoading FactorioLayout planner v0.2 ...\n");
 
 require "piece"
@@ -5,13 +6,14 @@ require "piecelist"
 
 testpiece = new_piece(10, 10);
 testpiece.routes:new(1, 1, 10, 10, 0);
---testpiece.routes:new(1, 10, 10, 1, 3);
+-- testpiece.routes:new(1, 10, 10, 1, 3);
 
 piecelist = new_piecelist();
 piecelist:insert(testpiece);
 
 testpiece.map:generate({
    [1]   = {[3] = "X", [9] = "X"},
+   -- [2]   = {[2] = "X"},
    [9]   = {[5] = "X", [10] = "X"},
    [10]  = {"X", "", "", "", "X", [9] = "X"}});
 
@@ -33,7 +35,7 @@ while(not piecelist:get_winner()) do
 
    if(oTime ~= os.time()) then
       oTime  = os.time();
-      print("Remaining: " .. maxInitTime - (os.time() - winnerT));
+      print("Remaining: " .. maxInitTime - (os.time() - winnerT)  .. " seconds, with " .. #piecelist .. " in buffer.");
    end
 end
 oldWinner = piecelist:get_winner();
@@ -52,7 +54,7 @@ while(os.time() - winnerT <= maxFinalTime) do
    end
    if(oTime ~= os.time()) then
       oTime  = os.time();
-      print("Remaining: " .. maxFinalTime - (os.time() - winnerT));
+      print("Remaining: " .. maxFinalTime - (os.time() - winnerT) .. " seconds, with " .. #piecelist .. " in buffer.");
    end
 end
 
