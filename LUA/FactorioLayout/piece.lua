@@ -1,9 +1,13 @@
-local function clean_coordinates(pX, pY)
-   return math.floor(pX + 0.4999), math.floor(pY + 0.4999);
-end
 function dir_offset(rotation)
-   local r = (math.pi/2) * rotation;
-   return clean_coordinates(math.cos(r), math.sin(r));
+   if(rotation == 0) then
+      return 1, 0;
+   elseif(rotation == 1) then
+      return 0, -1;
+   elseif(rotation == 2) then
+      return -1, 0;
+   else
+      return 0, 1;
+   end
 end
 
 -- Initialise the map to contain only types "E"
