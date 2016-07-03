@@ -112,6 +112,10 @@ local function get_heuristic(self, r, assmFactor)
 	return get_total_length(self, r, assmFactor) * self.heuristic.lengthFactor
 				+ get_total_cost(self, r, assmFactor) * self.heuristic.costFactor;
 end
+-- Return the absolute and known minimal heuristic value
+local function get_absolute_heuristic(self, r)
+	return get_heuristic(self, r, 1);
+end
 
 -- Return the number of the routes saved.
 local function get_number_routes(self)
@@ -145,6 +149,7 @@ function new_route_table()
 	newobject["get_total_cost"]			= get_total_cost;
 
 	newobject["get_heuristic"]				= get_heuristic;
+	newobject["get_absolute_heuristic"]	= get_absolute_heuristic;
 
 	setmetatable(newobject, {__len = get_number_routes});
 
