@@ -16,7 +16,7 @@ local function new_route(self, StartX, StartY, EndX, EndY, rotation_)
    self.data[i]["cost"]    = 0;
 end
 -- Return the route r, or false if not present.
-function get_route(self, r)
+local function get_route(self, r)
    if(self.data[r] == nil) then
       return false;
    else
@@ -150,8 +150,3 @@ function new_route_table()
 
 	return newobject;
 end
-
-tRoute = new_route_table();
-tRoute:new(1, 1, 10, 10, 0);
-
-print(#tRoute);

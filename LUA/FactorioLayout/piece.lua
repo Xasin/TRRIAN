@@ -274,22 +274,10 @@ end
 function new_piece(sizeX, sizeY)
   local newobject = {}
 
-  newobject["routes"] = {}
+  newobject["routes"] = new_route_table();
   newobject["map"] = {x = sizeX, y = sizeY}
 
   newobject["copy"] = copy;
-
-  newobject["routes"]["get"]  =  get_route;
-  newobject["routes"]["new"]  =  new_route;
-  newobject["routes"]["append"]  =  append_route;
-  newobject["routes"]["is_at_goal"] = route_is_at_goal;
-
-  newobject["get_total_length"]   = get_total_length;
-  newobject["get_total_cost"]     = get_total_cost;
-  newobject["get_total_estimate"] = get_total_estimate;
-  newobject["get_heuristic"]      = get_heuristic;
-
-  newobject["is_at_goal"]        = piece_is_at_goal;
 
   newobject["map"]["in_bounds"]  = in_bounds;
   newobject["map"]["set_block"]  = set_block;
