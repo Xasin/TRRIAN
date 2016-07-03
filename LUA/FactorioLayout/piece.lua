@@ -1,3 +1,5 @@
+require "routes"
+
 function dir_offset(rotation)
    if(rotation == 0) then
       return 1, 0;

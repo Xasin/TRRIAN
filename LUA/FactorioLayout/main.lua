@@ -18,7 +18,7 @@ testpiece.map:generate({
    [10]  = {"X", "", "", "", "X", [9] = "X"}});
 
 local maxInitTime    = 120;
-local maxFinalTime   = 10;
+local maxFinalTime   = 20;
 
 local starttime   = os.time();
 local startCPU    = os.clock();
