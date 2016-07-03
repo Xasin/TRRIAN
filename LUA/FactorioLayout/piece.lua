@@ -1,16 +1,5 @@
 require "routes"
-
-function dir_offset(rotation)
-   if(rotation == 0) then
-      return 1, 0;
-   elseif(rotation == 1) then
-      return 0, 1;
-   elseif(rotation == 2) then
-      return -1, 0;
-   else
-      return 0, -1;
-   end
-end
+require "utilities"
 
 -- Initialise the map to contain only types "E"
 local function init_map(self)
@@ -20,21 +9,6 @@ local function init_map(self)
          self.map[X][Y] = {type = "E"}
       end
    end
-end
-
--- Copy a given object and return it, instead of the same table
-function copy(self)
-   local newtable = {}
-
-   if(type(self) ~= "table") then
-      return self;
-   end
-
-   for k, i in pairs(self) do
-      newtable[k] = copy(i);
-   end
-
-   return newtable;
 end
 
 -- Generate a new route and initialise all values
@@ -59,7 +33,8 @@ function get_route(self, r)
       return self[r];
    end
 end
-function append_route(self, r, pX, pY, rot, length, cost)
+-- "Continue" a route, meaning: set the new home coordinates and edit length and cost values
+function continue_route(self, r, pX, pY, rot, length, cost)
    if(not self[r]) then
       return false;
    end
