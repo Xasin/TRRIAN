@@ -14,8 +14,8 @@ function get_best_piece(self)
 	local bestV 	= nil;
 
 	for k,v in pairs(self) do
-		if(type(v) == "table" and (v:get_heuristic() <= bestHeu)) then
-			bestHeu 	= v:get_heuristic();
+		if(type(v) == "table" and (v.routes:get_heuristic() <= bestHeu)) then
+			bestHeu 	= v.routes:get_heuristic();
 			bestV 	= v;
 		end
 	end
@@ -29,11 +29,12 @@ end
 
 -- Insert a new part into the list
 function insert(self, piece)
-	if(piece:is_at_goal() and piece:get_heuristic() < cHeur) then
+	if(piece.routes:all_at_goal() and piece:get_heuristic(1) < cHeur) then
 		cWinner = piece;
-		cHeur = piece:get_heuristic();
+		cHeur = piece:get_heuristic(1);
 		winnerT = os.time();
 		newWinner = true;
+
 	-- Only insert piece if it is actually worth it
 	elseif(self:get_winner() and self:get_winner():get_heuristic(1) <= piece:get_heuristic(1)) then
 		return;
@@ -78,13 +79,13 @@ end
 function expand_route_belts(self, piece, r)
 	local route = piece.routes:get(r);
 
-	local dX, dY = dir_offset(route.start.r);
-	local pX, pY = route.start.x + dX, route.start.y + dY;
+	local dX, dY = dir_offset(route.head.r);
+	local pX, pY = route.head.x + dX, route.head.y + dY;
 
 	for i = 0, 3 do
 		newobject = piece:copy();
 		if(newobject.map:place_if_viable(pX, pY, "belt", i)) then
-			newobject.routes:append(r, pX, pY, i, 1, 1)
+			newobject.routes:continue(r, pX, pY, i, 1, 1)
 			insert(self, newobject);
 		end
 	end
@@ -93,14 +94,14 @@ end
 function expand_route_ubelts(self, piece, r)
 	local route = piece.routes:get(r);
 
-	local dX, dY = dir_offset(route.start.r);
-	local pX, pY = route.start.x + dX, route.start.y + dY;
+	local dX, dY = dir_offset(route.head.r);
+	local pX, pY = route.head.x + dX, route.head.y + dY;
 
  	for i = 2, 6 do
 		newobject = piece:copy();
-		if(newobject.map:place_if_viable(pX, pY, "underground_belt", route.start.r, i)) then
+		if(newobject.map:place_if_viable(pX, pY, "underground_belt", route.head.r, i)) then
 
-			newobject.routes:append(r, pX + dX * i, pY + dY * i, route.start.r, i, 8);
+			newobject.routes:continue(r, pX + dX * i, pY + dY * i, route.head.r, i, 8);
 
 			insert(self, newobject);
 		end
@@ -119,8 +120,8 @@ function expand_piece(self, piece)
 		return;
 	end
 
-	for k,v in pairs(piece.routes) do
-		if(type(v) == "table" and (not piece.routes:is_at_goal(k))) then
+	for k,v in pairs(piece.routes.data) do
+		if(type(v) == "table" and (not piece.routes:route_at_goal(k))) then
 			expand_piece_route(self, piece, k);
 		end
 	end
@@ -157,6 +158,12 @@ end
 
 -- Generate a new piecelist
 function new_piecelist()
+
+	cWinner = nil;
+	cHeur = 100000000;
+	winnerT 	= os.time();
+	newWinner = false;
+
 	local newobject = {}
 
 	newobject["insert"] 	= insert;

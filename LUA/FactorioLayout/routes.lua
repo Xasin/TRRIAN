@@ -25,20 +25,18 @@ local function get_route(self, r)
 end
 -- "Continue" a route, meaning: set the new home coordinates and edit length and cost values
 local function continue_route(self, r, pX, pY, rot, length, cost)
-   if(not self[r]) then
-      return false;
-   end
+	local route = get_route(self, r);
+	if(not route) then return false; end
 
-   route = self[r];
-
-   route["head"]    = {x = pX, y = pY, r = rot};
-   route["length"]   = route["length"] + length;
-   route["cost"]     = route["cost"] + cost;
+   route.head    = {x = pX, y = pY, r = rot};
+   route.length   = route.length + length;
+	route.cost     = route.cost + cost;
 end
 
 -- Return true if the given route is at its endpoint
 local function route_is_at_goal(self, r)
-   return (self.data[r].head.x == self.data[r].endp.x) and (self.data[r].head.y == self[r].endp.x);
+	local route = get_route(self, r);
+   return (route.head.x == route.endp.x) and (route.head.y == route.endp.y);
 end
 -- Return true if all routes are at their goals.
 local function	all_routes_at_goal(self)
@@ -130,7 +128,7 @@ function new_route_table()
 	local newobject = {};
 
 	newobject["data"] 	= {};
-	newobject["heuristic"]	= {lengthFactor = 1, costFactor = 1, costPerLen = 1, assumptionFactor = 1.01};
+	newobject["heuristic"]	= {lengthFactor = 1, costFactor = 1, costPerLen = 1.1, assumptionFactor = 1.2};
 
 	newobject["new"]			= new_route;
 	newobject["get"]			= get_route;

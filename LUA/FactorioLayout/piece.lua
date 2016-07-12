@@ -11,104 +11,6 @@ local function init_map(self)
    end
 end
 
--- Generate a new route and initialise all values
-function new_route(self, StartX, StartY, EndX, EndY, rotation_)
-   local i = 1;
-   while(self[i]) do
-      i = i + 1;
-   end
-
-   self[i] = {}
-
-   self[i]["start"]   = {x = StartX, y = StartY, r = rotation_}
-   self[i]["endp"]    = {x = EndX, y = EndY}
-   self[i]["length"]  = 0;
-   self[i]["cost"]    = 0;
-end
--- Return the route r, or false if not present.
-function get_route(self, r)
-   if(self[r] == nil) then
-      return false;
-   else
-      return self[r];
-   end
-end
--- "Continue" a route, meaning: set the new home coordinates and edit length and cost values
-function continue_route(self, r, pX, pY, rot, length, cost)
-   if(not self[r]) then
-      return false;
-   end
-
-   route = self[r];
-
-   route["start"]    = {x = pX, y = pY, r = rot};
-   route["length"]   = route["length"] + length;
-   route["cost"]     = route["cost"] + cost;
-end
-
--- Return true if the given route is at its endpoint
-function route_is_at_goal(self, r)
-   return (self[r].start.x == self[r].endp.x and self[r].start.y == self[r].endp.x);
-end
-
--- Return the total length of all routes
-function get_total_length(self)
-   local tLen = 0;
-
-   for k, v in pairs(self.routes) do
-      if(type(v) == "table") then
-         tLen = tLen + v.length;
-      end
-   end
-
-   return tLen;
-end
--- Return the total cost of all routes
-function get_total_cost(self)
-   local tCost = 0;
-
-   for k, v in pairs(self.routes) do
-      if(type(v) == "table") then
-         tCost = tCost + v.cost;
-      end
-   end
-
-   return tCost;
-end
--- Return the expected length of all routes
-function get_total_estimate(self)
-   local tExpect = 0;
-
-   for k,v in pairs(self.routes) do
-      if(type(v) == "table") then
-         tExpect = tExpect + math.abs(v.start.x - v.endp.x) + math.abs(v.start.y - v.endp.y);
-      end
-   end
-
-   return tExpect;
-end
--- Return the total heuristic value
-function get_heuristic(self, expect_fact, lenFact, costFact)
-   lenFact = lenFact or 1;
-   costFact = costFact or 2;
-   expect_fact = expect_fact or 1.1;
-
-   return get_total_cost(self) * costFact
-            + get_total_length(self) * lenFact
-            + get_total_estimate(self) * (lenFact + costFact) * expect_fact;
-end
-
--- Return true if every route is at its endpoint
-function piece_is_at_goal(self)
-   for k,v in pairs(self.routes) do
-      if(type(v) == "table" and not route_is_at_goal(self.routes, k)) then
-         return false;
-      end
-   end
-
-   return true;
-end
-
 -- Check if a given dot is still within the bounds of the map
 local function in_bounds(self, pX, pY)
    return not ((pX < 1) or (pX > self.x) or (pY < 1) or (pY > self.y))
@@ -270,6 +172,10 @@ function generate_map(self, mArray)
    end
 end
 
+local function get_heuristic(self, assmFactor)
+   return self.routes:get_heuristic(assmFactor);
+end
+
 -- Initialise a new object
 function new_piece(sizeX, sizeY)
   local newobject = {}
@@ -289,6 +195,8 @@ function new_piece(sizeX, sizeY)
   newobject["map"]["place_if_viable"]  = place_if_viable;
 
   newobject["draw"]              = draw;
+
+  newobject["get_heuristic"]     = get_heuristic;
 
   init_map(newobject);
 
