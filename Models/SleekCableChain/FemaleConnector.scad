@@ -30,7 +30,7 @@ module FemaleConnector_standingClickAxis() {
     rotate([90, 0, 0])
     FemaleConnector_clickAxis($cRadius);
 
-    translate([-$cRadius, - (connectorThickness*2 + clearing), 0]) cube([2*$cRadius, connectorThickness*3 + clearing, FemaleConnectorHeight_click($cRadius)]);
+    translate([-$cRadius, - (connectorThickness*2 + clearing*2), 0]) cube([2*$cRadius, connectorThickness*3 + clearing*2, FemaleConnectorHeight_click($cRadius)]);
   }
 }
 
@@ -40,7 +40,7 @@ module FemaleConnector_standingFilamentAxis() {
     rotate([90, 0, 0])
     FemaleConnector_filaAxis($cRadius);
 
-    translate([-connectorRadius, - (connectorThickness*2 + clearing), 0]) cube([2*$cRadius, connectorThickness * 3 + clearing, FemaleConnectorHeight_filament($cRadius)]);
+    translate([-connectorRadius, - (connectorThickness*2 + clearing*2), 0]) cube([2*$cRadius, connectorThickness * 3 + clearing*2, FemaleConnectorHeight_filament($cRadius)]);
   }
 }
 
