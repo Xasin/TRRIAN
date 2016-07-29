@@ -7,9 +7,9 @@ function FemaleConnectorHeight() = (axisType == "click") ? FemaleConnectorHeight
 
 module FemaleConnector_disk() {
   translate([-$cRadius, -$cRadius, 0]) cube([2*$cRadius, 2*$cRadius, connectorThickness]);
-  translate([-$cRadius, $cRadius, 0]) cube([2*$cRadius, connectorThickness, connectorThickness*2 + clearing]);
+  translate([-$cRadius, $cRadius, 0]) cube([2*$cRadius, connectorThickness, connectorThickness*2 + clearing*2]);
 
-  translate([-$cRadius, connectorRadius - antislipLength, connectorThickness*2 + clearing]) cube([2*$cRadius, antislipLength + connectorThickness, wallThickness]);
+  translate([-$cRadius, connectorRadius - antislipLength, connectorThickness*2 + clearing*2]) cube([2*$cRadius, antislipLength + connectorThickness, wallThickness]);
 }
 
 module FemaleConnector_filaAxis() {

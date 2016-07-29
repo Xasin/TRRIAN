@@ -11,7 +11,7 @@ $fa = 5;
   // Minimum angle that the connector will be able to tilt right
   $angle2 = 0;
   // The length that one single piece will extend the cable chain by - set to 0 for minimal
-  ChainLinkLength = 15;
+  ChainLinkLength = 13;
   // Radius of the connector pieces -- affects height of the piece!
   connectorRadius = 4;
   // Width of a chain link piece (inside)
@@ -20,7 +20,7 @@ $fa = 5;
   gapSize = 6;
 
 // Thickness of the walls of the part - can also be specified separately for the connectors themselves.
-wallThickness = 0.72;
+wallThickness = 0.9;
 // Thickness of the walls to hold the cable. They don't need to be that sturdy
 cablewallThickness = 0.6;
 
@@ -39,7 +39,7 @@ cablewallThickness = 0.6;
   filamentHoleWallThickness = 1.2;
 
 // Clearing for some of the parts (like between female and male connector)
-clearing = 0.15;
+clearing = 0.2;
 // Computational value
 $cRadius = connectorRadius;
 // Computational value
