@@ -3,7 +3,7 @@ use <Connector.scad>
 include <Values.scad>
 
 
-FemaleConnectorHeight = connectorRadius + filamentDiameter/2 + connectorThickness + wallThickness;
+FemaleConnectorHeight = connectorRadius + filamentDiameter/2 + connectorThickness + filamentHoleWallThickness;
 
 module chainPiece() {
 

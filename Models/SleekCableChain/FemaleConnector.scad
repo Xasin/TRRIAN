@@ -6,7 +6,7 @@ function FemaleConnectorHeight_filament() = $cRadius + filamentDiameter/2 + conn
 function FemaleConnectorHeight() = (axisType == "click") ? FemaleConnectorHeight_click($cRadius, connectorThickness) : FemaleConnectorHeight_filament($cRadius, connectorThickness);
 
 module FemaleConnector_disk() {
-  translate([-$cRadius, -$cRadius, 0]) cube([2*$cRadius, 2*$cRadius + clearing, connectorThickness]);
+  translate([-$cRadius, -$cRadius, 0]) cube([2*$cRadius, 2*$cRadius, connectorThickness]);
   translate([-$cRadius, $cRadius, 0]) cube([2*$cRadius, connectorThickness, connectorThickness*2 + clearing]);
 
   translate([-$cRadius, connectorRadius - antislipLength, connectorThickness*2 + clearing]) cube([2*$cRadius, antislipLength + connectorThickness, wallThickness]);
