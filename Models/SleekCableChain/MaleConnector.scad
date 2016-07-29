@@ -1,44 +1,53 @@
-function aPoint(a) = [-sin(dToR(a)), cos(dToR(a))];
-function dToR(a) = a * 0.017453;
+include <Values.scad>
 
-
-$fs = 1;
-$fa = 5;
-
-// Diameter of the click-axis (for click-together type chains)
-clickAxisDiameter = 3;
-
-// Diameter of the filament (for Fila-Axis type chains)
-filamentDiameter = 1.75;
-
-
-module maleConnector_disk(a1, r, h = 1, a2 = 0) {
+module maleConnector_disk() {
 	$fs = 0.1;
-	linear_extrude(height = h) {
+	linear_extrude(height = connectorThickness) {
 		intersection() {
 			union() {
-				circle(r = r);
-				rotate(a2) square([r, r]);
-				rotate(90 + a1) square([r, r]);
-				translate([-r, -r]) square([2*r, r]);
+				circle(r = $cRadius);
+				rotate(-$angle2) square([$cRadius, $cRadius]);
+				rotate(90 + $angle1) square([$cRadius, $cRadius]);
+				translate([-$cRadius, -$cRadius]) square([2* $cRadius, $cRadius]);
 			}
-			translate([-r, -r]) square([2*r, 2*r]);
+
+			translate([-$cRadius*2, -$cRadius]) square([3* $cRadius, 2*$cRadius]);
 		}
 	}
 }
 
-module maleConnector_filaAxis(a1, r, h = 1, a2 = 0) {
+module maleConnector_filaAxis() {
 	difference() {
-		maleConnector_disk(a1, r, h, a2);
-		translate([0, 0, -0.1]) cylinder(d = filamentDiameter + 0.2, h = h + 1, $fn = 13);
+		maleConnector_disk();
+		translate([0, 0, -0.1]) cylinder(d = filamentDiameter + 0.23, h = connectorThickness + 1, $fn = 15);
 	}
 }
 
-module maleConnector_clickAxis(a1, r, h = 1, a2 = 0) {
+module maleConnector_clickAxis() {
 	difference() {
-		maleConnector_disk(a1, r, h, a2);
-		translate([0, 0, -0.1]) cylinder(d = clickAxisDiameter + 0.2, h = h + 1, $fn = 13);
-		translate([-clickAxisDiameter/2, 0, -0.1]) cube([clickAxisDiameter, r + 1, 0.3]);
+		maleConnector_disk();
+		translate([0, 0, -0.1]) cylinder(d = clickAxisDiameter + clearing, h = 1000, $fn = 15);
+		translate([-clickAxisDiameter/2, 0, -0.1]) cube([clickAxisDiameter, $cRadius + 1, 0.3]);
 	}
 }
-				
+
+module maleConnector_standingFilaAxis() {
+	translate([0, 0, $cRadius])
+	rotate([90, 0, 0])
+	maleConnector_filaAxis();
+}
+
+module maleConnector_standingClickAxis() {
+	translate([0, 0, $cRadius])
+	rotate([90, 0, 0])
+	maleConnector_clickAxis();
+}
+
+module MaleConnector() {
+	if(axisType == "click") {
+		maleConnector_standingClickAxis();
+	}
+	else {
+		maleConnector_standingFilaAxis();
+	}
+}
