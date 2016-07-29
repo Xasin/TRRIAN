@@ -19,7 +19,7 @@ module maleConnector_disk() {
 module maleConnector_filaAxis() {
 	difference() {
 		maleConnector_disk();
-		translate([0, 0, -0.1]) cylinder(d = filamentDiameter + 0.23, h = connectorThickness + 1, $fn = 15);
+		translate([0, 0, -0.1]) cylinder(d = filamentDiameter + 0.25, h = connectorThickness + 1, $fn = 15);
 	}
 }
 

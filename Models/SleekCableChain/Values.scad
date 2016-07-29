@@ -20,7 +20,7 @@ $fa = 5;
   gapSize = 0;
 
 // Thickness of the walls of the part - can also be specified separately for the connectors themselves.
-wallThickness = 1;
+wallThickness = 1.2;
 // Thickness of the walls to hold the cable. They don't need to be that sturdy
 cablewallThickness = 1;
 

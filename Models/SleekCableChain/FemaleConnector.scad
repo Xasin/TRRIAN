@@ -17,7 +17,7 @@ module FemaleConnector_disk() {
 module FemaleConnector_filaAxis() {
   difference() {
     FemaleConnector_disk();
-    translate([0, 0, -0.1]) cylinder(d = filamentDiameter + 0.12, h = 1000, $fn = 15);
+    translate([0, 0, -0.1]) cylinder(d = filamentDiameter + 0.25, h = 1000, $fn = 15);
   }
 }
 
