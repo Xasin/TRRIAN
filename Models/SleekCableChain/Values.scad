@@ -7,26 +7,26 @@ $fa = 5;
 
 // === BASIC CONFIG VALUES - Use for most settings ===
   // Maximum angle that the connector will be able to tilt left
-  $angle1 = 45;
+  $angle1 = 180 / 4;
   // Minimum angle that the connector will be able to tilt right
   $angle2 = 0;
   // The length that one single piece will extend the cable chain by - set to 0 for minimal
-  ChainLinkLength = 13;
+  ChainLinkLength = 15;
   // Radius of the connector pieces -- affects height of the piece!
   connectorRadius = 4;
   // Width of a chain link piece (inside)
-  chainLinkWidth = 10;
-  // Size of the gap to insert wires through. Put in 0 for no gap.
-  gapSize = 6;
+  chainLinkWidth = 8;
+  // Size of the gap to insert wires through. Put in 0 for a opened-inwards piece
+  gapSize = 0;
 
 // Thickness of the walls of the part - can also be specified separately for the connectors themselves.
-wallThickness = 0.9;
+wallThickness = 1;
 // Thickness of the walls to hold the cable. They don't need to be that sturdy
-cablewallThickness = 0.6;
+cablewallThickness = 1;
 
 // === CONNECTOR-RELATED CONFIG VALUES ===
-  // Length of the slip-preventing wall on the outside of the female connector
-  antislipLength = 2;
+  // Length of the slip-preventing wall on the outside of the female connector, set to 0 to disable
+  antislipLength = 1.5;
   // Diameter of the click-axis (for click-together type chains)
   clickAxisDiameter = 3;
   // Height of the click-axis pin
@@ -43,6 +43,6 @@ clearing = 0.2;
 // Computational value
 $cRadius = connectorRadius;
 // Computational value
-chainLinkLength = (ChainLinkLength == 0) ? connectorRadius * 2 : ChainLinkLength;
+chainLinkLength = (ChainLinkLength == 0) ? connectorRadius * 2 + connectorThickness + 0.1 : ChainLinkLength;
 // Computational value
 axisType = "filament";
