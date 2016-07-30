@@ -7,11 +7,11 @@ $fa = 5;
 
 // === BASIC CONFIG VALUES - Use for most settings ===
   // Maximum angle that the connector will be able to tilt left
-  $angle1 = 180 / 4;
+  $angle1 = 0;
   // Minimum angle that the connector will be able to tilt right
   $angle2 = 0;
   // The length that one single piece will extend the cable chain by - set to 0 for minimal
-  ChainLinkLength = 15;
+  ChainLinkLength = 150 / 4;
   // Radius of the connector pieces -- affects height of the piece!
   connectorRadius = 4;
   // Width of a chain link piece (inside)
