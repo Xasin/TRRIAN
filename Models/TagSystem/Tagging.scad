@@ -1,16 +1,15 @@
 
-// Currently used supervariables are: $shown, $not-shown, $colortable
+// Currently used supervariables are: $shown, $not-shown, $colortable, $highlighted, $opacity
 
 function contains(sArray, cString) = (len(sArray) > 0) ? max( [for(i = [0:len(sArray) -1]) sArray[i] == cString ? 1 : 0 ]) == 1 : false;
 
 module color_appropriately(tagname) {
-	if($colortable != $colortable) {
+	if(!contains($colortable, tagname)) {
 		children();
 	}
 	else {
 		coloring = $colortable[search([tagname], $colortable, 1, 0)[0] + 1];
-		if(coloring == coloring)
-			color(coloring) children();
+		color(coloring, $opacity) children();
 	}
 }
 
@@ -25,13 +24,19 @@ module separate_tagging() {
 // -- It is listed in the $shown array
 // -- The $show array is empty and it is not excluded (via $not_shown) AND it is a foreground object
 module tag(tagname, foreground = true) {
-	color_appropriately(tagname) 
-	if(len($shown) > 0) {
-		if(contains($shown, tagname))
+	color_appropriately(tagname)
+		if(len($shown) > 0) {
+			if(contains($shown, tagname))
+				separate_tagging() children();
+		}
+		else if(foreground && !contains($not_shown, tagname))
 			separate_tagging() children();
-	}
-	else if(foreground && !contains($not_shown, tagname))
+	
+	if(contains($highlighted, tagname)) {
+		$opacity = 0.2;
+		%color_appropriately(tagname)
 		separate_tagging() children();
+	}
 }
 
 module showOnly(tagname) {
@@ -63,9 +68,15 @@ module colorTag(tagname, coloring) {
 	children();
 }
 
+module highlightTag(tagname) {
+	$highlighted = concat($highlighted, tagname);
+	
+	children();
+}
+
 module taggedUnion(targets, tagname, foreground = true) {
 	union() {
-		tag(tagname, foreground) separate_tagging() 
+		tag(tagname, foreground)
 		union() {
 			showTag(targets) children();
 		}
@@ -81,7 +92,7 @@ module taggedUnion(targets, tagname, foreground = true) {
 
 module taggedDifference(positives, negatives, tagname, foreground = true) {
 	union() {
-		tag(tagname, foreground) separate_tagging() 
+		tag(tagname, foreground)
 		difference() {
 			showTag(positives) children();
 			showTag(negatives) children();
@@ -98,7 +109,7 @@ module taggedDifference(positives, negatives, tagname, foreground = true) {
 
 module taggedIntersection(targets, tagname, foreground = true) {
 	union() {
-		tag(tagname, foreground) separate_tagging() 
+		tag(tagname, foreground)
 		intersection_for(i = targets) {
 			showTag(i) children();
 		}
@@ -113,16 +124,18 @@ module taggedIntersection(targets, tagname, foreground = true) {
 }
 
 module testobject() {
-	tag("testthing") cube(20);
+	tag("testthing", foreground=false) cube(20);
 }
 
 showTag("quartersphere")
+
+highlightTag(["test", "testthing"])
 
 colorTag("test", "red")
 colorTag("mop", "blue")
 
 taggedIntersection(["test", "testthing"], "quartersphere", false)
-taggedIntersection(["test", "mop"], "inttest", true)
+taggedIntersection(["test", "mop"], "inttest", false)
 taggedDifference("test", "mop", "difftest", false)
 taggedUnion(["test", "mop"], "unitest", false) 
 
