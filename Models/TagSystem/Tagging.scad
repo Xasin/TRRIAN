@@ -126,21 +126,3 @@ module taggedIntersection(targets, tagname, foreground = true) {
 module testobject() {
 	tag("testthing", foreground=false) cube(20);
 }
-
-showTag("quartersphere")
-
-highlightTag(["test", "testthing"])
-
-colorTag("test", "red")
-colorTag("mop", "blue")
-
-taggedIntersection(["test", "testthing"], "quartersphere", false)
-taggedIntersection(["test", "mop"], "inttest", false)
-taggedDifference("test", "mop", "difftest", false)
-taggedUnion(["test", "mop"], "unitest", false) 
-
-{
-	tag("test") sphere(r = 10);
-	tag("mop") cube([15, 5, 5]);
-	testobject();
-}
