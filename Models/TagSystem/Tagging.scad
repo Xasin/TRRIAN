@@ -27,15 +27,15 @@ module tag(tagname, foreground = true) {
 	color_appropriately(tagname)
 		if(len($shown) > 0) {
 			if(contains($shown, tagname))
-				separate_tagging() children();
+				separate_tagging() render(convexity = 5) children();
 		}
 		else if(foreground && !contains($not_shown, tagname))
-			separate_tagging() children();
+			separate_tagging() render(convexity = 5) children();
 	
 	if(contains($highlighted, tagname)) {
 		$opacity = 0.2;
 		%color_appropriately(tagname)
-		separate_tagging() children();
+		separate_tagging() render(convexity = 5) children();
 	}
 }
 
@@ -121,8 +121,4 @@ module taggedIntersection(targets, tagname, foreground = true) {
 			children();
 		}
 	}
-}
-
-module testobject() {
-	tag("testthing", foreground=false) cube(20);
 }

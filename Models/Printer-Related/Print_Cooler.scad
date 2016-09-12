@@ -1,4 +1,4 @@
-ductHeight = 20;
+ductHeight = 25;
 
 use </usr/lib/openscad/arm_joints.scad>
 
@@ -48,14 +48,16 @@ module fanHold() {
 }
 
 module airDuct() {
+	$fs = 0.6;
+	ductWidth = 8;
 	difference() {
 		forNormal() {
-			smoothCube([42, 13, ductHeight]);
+			smoothCube([42, ductWidth + 2, ductHeight], 5);
 		}
 		
 		
 		forGDiff() {
-			translate([1, 1, -0.01]) smoothCube([40, 11, ductHeight + 10], 4);
+			translate([1, 1, -0.01]) smoothCube([40, ductWidth, ductHeight + 10], 4);
 		}
 	}
 }
@@ -64,7 +66,9 @@ module build() {
 	forNormal() translate([-21, 0, 3.5]) rotate([-90, 0, 90]) armEndRounded();
 	
 	fanHold();
-	rotate([-5, 0, 0]) translate([-21, -21, -ductHeight + 4]) airDuct();
+	rotate([-8, 0, 0]) translate([-21, -21, -ductHeight + 3]) airDuct();
 }
 
-buildAssembly();
+//buildAssembly();
+
+armEndRounded();
