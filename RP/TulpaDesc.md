@@ -12,6 +12,8 @@ Xasin, the host of the system, is a red-furred male dragon, with a white underbe
 Down from between his two straight horns a broad, cyan-colored luminescent stripe runs right up to the tip of his tail; other body regions feature a similar luminescent glow.
 Additionally to this, black, separating lines run between the red and white regions.
 
+[spoiler] <img src="http://i.imgur.com/OC30eTA.jpg"> [/spoiler]
+
 #### Neira
 
 Neira is the oldest tulpa of the system. She was planned and forced for three months, starting from the 26.08.13, before reaching vocality.
