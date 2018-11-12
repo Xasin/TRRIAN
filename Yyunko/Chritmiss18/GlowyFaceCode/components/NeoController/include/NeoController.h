@@ -15,23 +15,24 @@
 #include "freertos/task.h"
 
 #include "Color.h"
-
+#include "Layer.h"
 
 namespace Peripheral {
 
 class NeoController {
-private:
-	Color * colors;
-	Color * nextColors;
+public:
+	const uint8_t length;
 
+	Layer colors;
+	Layer nextColors;
+
+private:
 	const gpio_num_t pinNo;
 	const rmt_channel_t channel;
 
 	esp_pm_lock_handle_t powerLock;
 
 public:
-	const uint8_t length;
-
 	NeoController(gpio_num_t pin, rmt_channel_t channel, uint8_t length);
 
 	void update();

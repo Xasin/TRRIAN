@@ -43,14 +43,22 @@ extern "C" void app_main(void)
 	uint32_t colors[] = {Material::RED, Material::GREEN, Material::BLUE};
 
 	lightController->fill(Color(Material::RED, 90));
+	Layer mLayer(lightController->nextColors);
+	Layer dimLayer(16);
+	dimLayer.fill(0xaaaaaa);
+
 	while (true) {
 		level++;
 		(*lightController)[level] = colors[cColor];
+		lightController->nextColors.merge_multiply(dimLayer);
 		lightController->fadeTransition(130000);
 
 		if(level >= 16) {
 			level = 0;
 			cColor++;
+
+			lightController->nextColors.merge_multiply(mLayer);
+
 			if(cColor >= 3)
 				cColor = 0;
 		}

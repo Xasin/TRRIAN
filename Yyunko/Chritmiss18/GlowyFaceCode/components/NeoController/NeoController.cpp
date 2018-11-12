@@ -37,9 +37,9 @@ static void IRAM_ATTR u8_to_WS2812(const void* source, rmt_item32_t* destination
 }
 
 NeoController::NeoController(gpio_num_t pin, rmt_channel_t channel, uint8_t length) :
-		pinNo(pin), channel(channel), length(length) {
-	this->colors = new Color[length];
-	this->nextColors = new Color[length];
+		length(length),
+		colors(length), nextColors(length),
+		pinNo(pin), channel(channel) {
 
 	clear();
 	apply();

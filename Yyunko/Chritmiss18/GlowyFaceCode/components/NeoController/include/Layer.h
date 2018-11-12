@@ -5,8 +5,6 @@
  *      Author: xasin
  */
 
-#define COMPONENTS_NEOCONTROLLER_LAYER_H_
-
 #ifndef COMPONENTS_NEOCONTROLLER_LAYER_H_
 #define COMPONENTS_NEOCONTROLLER_LAYER_H_
 
@@ -23,21 +21,21 @@ namespace Peripheral {
 		Layer(const int length);
 		Layer(const Layer &source);
 
-		Color *operator[](int id);
-		const Color *operator[](int id) const;
+		Color& operator[](int id);
+		Color  operator[](int id) const;
 
-		void fill(Color fColor);
+		void fill(Color fColor, int from = 0, int to = -1);
 
-		void merge_overlay(const Layer &top, int offset = 0, bool wrap = false);
-		void merge_multiply(const Layer &top, int offset = 0, bool wrap = false);
-		void merge_multiply(const uint8_t *scalars);
-		void merge_add(const Layer &top, int offset = 0, bool wrap = false);
+		Layer& merge_overlay(const Layer &top, int offset = 0, bool wrap = false);
+		Layer& merge_multiply(const Layer &top, int offset = 0, bool wrap = false);
+		Layer& merge_multiply(const uint8_t *scalars);
+		Layer& merge_add(const Layer &top, int offset = 0, bool wrap = false);
 
-		Layer& calculate_overlay(const Layer &top, int offset = 0, bool wrap = false) const;
-		Layer& calculate_multiply(const Layer &top, int offset = 0, bool wrap = false) const;
-		Layer& calculate_multiply(const uint8_t *scalars) const;
-		Layer& calculate_add(const Layer &top, int offset = 0, bool wrap = false) const;
-	}
+//		Layer& calculate_overlay(const Layer &top, int offset = 0, bool wrap = false) const;
+//		Layer& calculate_multiply(const Layer &top, int offset = 0, bool wrap = false) const;
+//		Layer& calculate_multiply(const uint8_t *scalars) const;
+//		Layer& calculate_add(const Layer &top, int offset = 0, bool wrap = false) const;
+	};
 }
 
 #endif

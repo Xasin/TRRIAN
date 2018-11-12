@@ -50,7 +50,7 @@ public:
 	void set(uint32_t cCode);
 	void set(uint32_t cCode, uint8_t div);
 	void set(Color color);
-	Color& operator=(uint32_t cCode);
+	Color& operator=(const Color& nColor);
 
 	void bMod(uint8_t div);
 
@@ -60,15 +60,15 @@ public:
 	Color operator +(Color secondColor);
 	Color operator *(uint8_t brightness);
 
-	// Color& merge_overlay(const Color &top, uint8_t alpha = 255);
-	// Color& merge_multiply(const Color &top, uint8_t alpha = 255);
-	// Color& merge_multiply(uint8_t scalar);
-	// Color& merge_add(const Color &top, uint8_t alpha = 255);
-	//
-	// Color& calculate_overlay(const Color &top, uint8_t alpha = 255) const;
-	// Color& calculate_multiply(const Color &top, uint8_t alpha = 255) const;
-	// Color& calculate_multiply(uint8_t scalar) const;
-	// Color& calculate_add(const Color &top, uint8_t alpha = 255) const;
+	Color& merge_overlay(const Color &top, uint8_t alpha = 255);
+	Color& merge_multiply(const Color &top, uint8_t alpha = 255);
+	Color& merge_multiply(uint8_t scalar);
+	Color& merge_add(const Color &top, uint8_t alpha = 255);
+
+	Color calculate_overlay(const Color &top, uint8_t alpha = 255) const;
+	Color calculate_multiply(const Color &top, uint8_t alpha = 255) const;
+	Color calculate_multiply(uint8_t scalar) const;
+	Color calculate_add(const Color &top, uint8_t alpha = 255) const;
 };
 
 
