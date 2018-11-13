@@ -8,6 +8,8 @@
 
 #include "NeoController.h"
 
+#include "ManeAnimator.h"
+
 using namespace Peripheral;
 
 NeoController *lightController = nullptr;
@@ -44,33 +46,42 @@ extern "C" void app_main(void)
 
 	lightController->fill(Color(Material::RED, 90));
 
+	ManeAnimator mane(16);
+
 	Layer bLayer(16);
+	bLayer.alpha = 100;
 	Layer dimLayer(16);
-	Layer cLayer(16);
+
+	Layer cTargetLayer(16);
+	cTargetLayer.alpha = 4;
+	Layer cActualLayer(16);
 
 	dimLayer.fill(0x222222);
-	dimLayer.alpha = 50;
-
-	int64_t startTime = esp_timer_get_time();
-	int64_t endTime = startTime;
+	dimLayer.alpha = 10;
 
 	while (true) {
-		level++;
-		bLayer[level] = 0xFFFFFF;
-		bLayer.merge_multiply(dimLayer);
 
-		cLayer[level/2] = colors[cColor];
+		bLayer.fill(Color(Material::CYAN, 80));
+		bLayer.merge_multiply(mane.scalarPoints);
 
-		lightController->nextColors = cLayer;
-		lightController->nextColors.merge_multiply(bLayer);
-		lightController->fadeTransition(130000);
+//		cTargetLayer[level] = colors[cColor];
+//		cActualLayer.merge_overlay(cTargetLayer);
+//
+//		lightController->nextColors = cActualLayer;
+		lightController->fill(Color(Material::CYAN, 40));
+		lightController->nextColors.merge_overlay(bLayer);
 
-		if(level >= 32) {
-			level = 0;
-			cColor++;
+		mane.tick();
 
-			if(cColor >= 3)
-				cColor = 0;
-		}
+		lightController->apply();
+		lightController->update();
+
+		vTaskDelay(10);
+
+
+		level  = (16*esp_timer_get_time())/1000000 % 32;
+		if(level == 0)
+			mane.points[0].pos = 1;
+		cColor = (esp_timer_get_time())/1000000 % 3;
 	}
 }

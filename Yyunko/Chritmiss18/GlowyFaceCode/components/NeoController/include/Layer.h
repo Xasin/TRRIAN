@@ -8,18 +8,21 @@
 #ifndef COMPONENTS_NEOCONTROLLER_LAYER_H_
 #define COMPONENTS_NEOCONTROLLER_LAYER_H_
 
+#include <vector>
+
 #include "Color.h"
 
 namespace Peripheral {
 	class Layer {
 	public:
-		const int length;
-		Color *colors;
+		std::vector<Color> colors;
 
 		uint8_t alpha;
 
 		Layer(const int length);
 		Layer(const Layer &source);
+
+		int length() const;
 
 		Color& operator[](int id);
 		Color  operator[](int id) const;
@@ -29,7 +32,7 @@ namespace Peripheral {
 
 		Layer& merge_overlay(const Layer &top, int offset = 0, bool wrap = false);
 		Layer& merge_multiply(const Layer &top, int offset = 0, bool wrap = false);
-		Layer& merge_multiply(const uint8_t *scalars);
+		Layer& merge_multiply(const std::vector<uint8_t> &scalars, int offset=0, bool wrap = false);
 		Layer& merge_add(const Layer &top, int offset = 0, bool wrap = false);
 
 //		Layer& calculate_overlay(const Layer &top, int offset = 0, bool wrap = false) const;

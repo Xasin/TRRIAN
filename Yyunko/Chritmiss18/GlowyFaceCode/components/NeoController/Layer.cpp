@@ -3,47 +3,41 @@
 
 namespace Peripheral {
 
-Layer::Layer(const int length) :length(length) {
-	colors = new Color[length];
-
+Layer::Layer(const int length) : colors(length) {
 	alpha = 255;
 }
-Layer::Layer(const Layer &source) : Layer(source.length) {
-	for(int i=0; i<length; i++)
-		colors[i] = source[i];
-
+Layer::Layer(const Layer &source) : colors(source.colors) {
 	alpha = source.alpha;
 }
 
+int Layer::length() const {
+	return colors.size();
+}
+
 Color& Layer::operator[](int id) {
-	id %= length;
+	id %= length();
 
 	return colors[id];
 }
 Color Layer::operator[](int id) const {
-	id %= length;
+	id %= length();
 
 	return colors[id];
 }
 Layer& Layer::operator=(const Layer& source) {
-	int cAmount = this->length;
-	if(source.length < cAmount)
-		cAmount = source.length;
-
-	for(int i=0; i<cAmount; i++)
-		this->colors[i] = source[i];
+	this->colors = source.colors;
 
 	return *this;
 }
 
 Layer& Layer::fill(Color fColor, int from, int to) {
 	if(to == -1)
-		to = length;
+		to = length();
 
 	if(from < 0)
 		from = 0;
-	if(to > length)
-		to = length;
+	if(to > length())
+		to = length();
 
 	if(from > to) {
 		int temp = to;
@@ -59,13 +53,13 @@ Layer& Layer::fill(Color fColor, int from, int to) {
 
 Layer& Layer::merge_overlay(const Layer &top, int offset, bool wrap) {
 	int from = offset;
-	int to   = offset + top.length;
+	int to   = offset + top.length();
 
 	if(!wrap) {
 		if(from < 0)
 			from = 0;
-		if(to > length)
-			to = length;
+		if(to > length())
+			to = length();
 	}
 
 	for(int i=from; i<to; i++) {
@@ -76,13 +70,13 @@ Layer& Layer::merge_overlay(const Layer &top, int offset, bool wrap) {
 }
 Layer& Layer::merge_multiply(const Layer &top, int offset, bool wrap) {
 	int from = offset;
-	int to   = offset + top.length;
+	int to   = offset + top.length();
 
 	if(!wrap) {
 		if(from < 0)
 			from = 0;
-		if(to > length)
-			to = length;
+		if(to > length())
+			to = length();
 	}
 
 	for(int i=from; i<to; i++) {
@@ -91,9 +85,19 @@ Layer& Layer::merge_multiply(const Layer &top, int offset, bool wrap) {
 
 	return *this;
 }
-Layer& Layer::merge_multiply(const uint8_t *scalars) {
+Layer& Layer::merge_multiply(const std::vector<uint8_t> &scalars, int offset, bool wrap) {
+	int from = offset;
+	int to   = offset + scalars.size();
 
-	for(int i=0; i<length; i++) {
+	if(!wrap) {
+		if(from < 0)
+			from = 0;
+		if(to > length())
+			to = length();
+	}
+
+
+	for(int i=from; i<to; i++) {
 		(*this)[i].merge_multiply(scalars[i]);
 	}
 
@@ -101,13 +105,13 @@ Layer& Layer::merge_multiply(const uint8_t *scalars) {
 }
 Layer& Layer::merge_add(const Layer &top, int offset, bool wrap) {
 	int from = offset;
-	int to   = offset + top.length;
+	int to   = offset + top.length();
 
 	if(!wrap) {
 		if(from < 0)
 			from = 0;
-		if(to > length)
-			to = length;
+		if(to > length())
+			to = length();
 	}
 
 	for(int i=from; i<to; i++) {
