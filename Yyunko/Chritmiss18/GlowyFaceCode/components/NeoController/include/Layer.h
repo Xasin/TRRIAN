@@ -23,8 +23,9 @@ namespace Peripheral {
 
 		Color& operator[](int id);
 		Color  operator[](int id) const;
+		Layer& operator=(const Layer& source);
 
-		void fill(Color fColor, int from = 0, int to = -1);
+		Layer& fill(Color fColor, int from = 0, int to = -1);
 
 		Layer& merge_overlay(const Layer &top, int offset = 0, bool wrap = false);
 		Layer& merge_multiply(const Layer &top, int offset = 0, bool wrap = false);

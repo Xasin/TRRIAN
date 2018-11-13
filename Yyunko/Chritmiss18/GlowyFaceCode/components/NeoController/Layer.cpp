@@ -25,8 +25,18 @@ Color Layer::operator[](int id) const {
 
 	return colors[id];
 }
+Layer& Layer::operator=(const Layer& source) {
+	int cAmount = this->length;
+	if(source.length < cAmount)
+		cAmount = source.length;
 
-void Layer::fill(Color fColor, int from, int to) {
+	for(int i=0; i<cAmount; i++)
+		this->colors[i] = source[i];
+
+	return *this;
+}
+
+Layer& Layer::fill(Color fColor, int from, int to) {
 	if(to == -1)
 		to = length;
 
@@ -43,6 +53,8 @@ void Layer::fill(Color fColor, int from, int to) {
 
 	for(int i=from; i<to; i++)
 		colors[i] = fColor;
+
+	return *this;
 }
 
 Layer& Layer::merge_overlay(const Layer &top, int offset, bool wrap) {
