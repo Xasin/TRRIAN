@@ -1,3 +1,6 @@
+
+#include <functional>
+
 #include "freertos/FreeRTOS.h"
 #include "esp_wifi.h"
 #include "esp_system.h"
@@ -17,6 +20,10 @@ NeoController *lightController = nullptr;
 esp_err_t event_handler(void *ctx, system_event_t *event)
 {
 return ESP_OK;
+}
+
+void lambdaCaller(void *arg) {
+	(*reinterpret_cast<std::function<void(void)>*>(arg))();
 }
 
 extern "C" void app_main(void)
@@ -40,48 +47,68 @@ extern "C" void app_main(void)
 	lightController->fadeTransition(1000000);
 
 	int level = 0;
+	int fadePos = 0;
 	int cColor = 0;
-
-	uint32_t colors[] = {Material::RED, Material::GREEN, Material::BLUE};
+	uint32_t colors[]	  = {Material::CYAN, Material::YELLOW, Material::PURPLE};
+	uint32_t backColors[] = {Material::BLUE, Material::DEEP_ORANGE, Material::DEEP_PURPLE};
 
 	lightController->fill(Color(Material::RED, 90));
 
-	ManeAnimator mane(16);
+	ManeAnimator mane(7);
+	mane.wrap = true;
 
-	Layer bLayer(16);
-	bLayer.alpha = 100;
-	Layer dimLayer(16);
+	Layer tgtBackground(16);
+	tgtBackground.alpha = 10;
+	Layer smBackground(16);
 
-	Layer cTargetLayer(16);
-	cTargetLayer.alpha = 4;
-	Layer cActualLayer(16);
+	Layer tgtManeForeground(7);
+	tgtManeForeground.alpha = 30;
 
-	dimLayer.fill(0x222222);
-	dimLayer.alpha = 10;
+	Layer smManeForeground(7);
+	Layer animManeForeground(7);
+
+	std::function<void(void)> animatorLambda = [&]() {
+		while(true) {
+			mane.tick();
+
+			smBackground.merge_overlay(tgtBackground);
+			smManeForeground.merge_overlay(tgtManeForeground);
+
+			animManeForeground = smManeForeground;
+			animManeForeground.merge_multiply(mane.scalarPoints);
+
+			lightController->nextColors = smBackground;
+			lightController->nextColors.merge_overlay(animManeForeground, -3, true);
+
+			lightController->apply();
+			lightController->update();
+
+			vTaskDelay(10);
+		}
+	};
+
+	TaskHandle_t animatorTask;
+	xTaskCreate(&lambdaCaller, "Animator Thread", 4048, &animatorLambda, 3, &animatorTask);
 
 	while (true) {
-
-		bLayer.fill(Color(Material::CYAN, 80));
-		bLayer.merge_multiply(mane.scalarPoints);
-
-//		cTargetLayer[level] = colors[cColor];
-//		cActualLayer.merge_overlay(cTargetLayer);
-//
-//		lightController->nextColors = cActualLayer;
-		lightController->fill(Color(Material::CYAN, 40));
-		lightController->nextColors.merge_overlay(bLayer);
-
-		mane.tick();
+		tgtBackground[fadePos]    = 0x111111;
+		tgtBackground[fadePos -3] = backColors[cColor];
+		tgtManeForeground[fadePos -3] = colors[cColor];
 
 		lightController->apply();
 		lightController->update();
 
-		vTaskDelay(10);
+		vTaskDelay(20);
 
+		level  = (esp_timer_get_time())/10000 % 300;
+		if(level <= 30)
+			mane.points[fadePos/10 % mane.points.size()].vel += 0.003;
 
-		level  = (16*esp_timer_get_time())/1000000 % 32;
-		if(level == 0)
-			mane.points[0].pos = 1;
-		cColor = (esp_timer_get_time())/1000000 % 3;
+		cColor = (esp_timer_get_time())/15000000 % 3;
+		fadePos = (10*16*esp_timer_get_time())/15000000;
+
+		int shiftFadePos = (fadePos + 3) % (10*16);
+		if(shiftFadePos < mane.points.size())
+			mane.points[shiftFadePos].vel += 0.0012;
 	}
 }

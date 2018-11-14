@@ -11,16 +11,16 @@ ManeAnimator::ManeAnimator(const int length) :
 	points(length), scalarPoints(length) {
 
 	for(PointData &p : points) {
-		p.pos = 0;
+		p.pos = 0.0;
 		p.vel = 0;
 	}
 
-	basePoint = 0.5;
+	basePoint = 0.3;
 	baseTug = 0.0001;
 
-	dampening = 0.99995;
+	dampening = 0.99;
 
-	ptpTug = 0.003;
+	ptpTug = 0.025;
 
 	wrap = false;
 }
