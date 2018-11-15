@@ -50,39 +50,37 @@ extern "C" void app_main(void)
 	int fadePos = 0;
 	int cColor = 0;
 	uint32_t colors[]	  = {Material::CYAN, Material::YELLOW, Material::PURPLE};
-	uint32_t backColors[] = {Material::BLUE, Material::DEEP_ORANGE, Material::DEEP_PURPLE};
+	uint32_t backColors[] = {Material::BLUE, Material::AMBER, Material::DEEP_PURPLE};
 
 	lightController->fill(Color(Material::RED, 90));
 
-	ManeAnimator mane(7);
+	ManeAnimator mane(8);
 	mane.wrap = true;
 
 	Layer tgtBackground(16);
-	tgtBackground.alpha = 10;
+	tgtBackground.alpha = 12;
 	Layer smBackground(16);
 	smBackground.fill(0xFF0000);
 
-	Layer tgtManeForeground(7);
-	tgtManeForeground.alpha = 30;
+	Layer tgtManeForeground(8);
+	tgtManeForeground.alpha = 40;
 
-	Layer smManeForeground(7);
-	Layer animManeForeground(7);
+	Layer smManeForeground(8);
+	smManeForeground.alpha = 200;
+	Layer animManeForeground(8);
 
 	std::function<void(void)> animatorLambda = [&]() {
 		while(true) {
 			mane.tick();
 
 			smBackground.merge_overlay(tgtBackground);
-//			smManeForeground.merge_overlay(tgtManeForeground);
-//
-//			animManeForeground = smManeForeground;
-//			animManeForeground.merge_multiply(mane.scalarPoints);
+			smManeForeground.merge_overlay(tgtManeForeground);
 
-			animManeForeground.fill(0x0000FF);
+			animManeForeground = smManeForeground;
 			animManeForeground.merge_multiply(mane.scalarPoints);
 
 			lightController->nextColors = smBackground;
-			lightController->nextColors.merge_overlay(animManeForeground, 0, true);
+			lightController->nextColors.merge_overlay(animManeForeground, -4, true);
 
 			lightController->apply();
 			lightController->update();
@@ -96,13 +94,13 @@ extern "C" void app_main(void)
 
 	while (true) {
 		tgtBackground[fadePos] = backColors[cColor];
-		tgtManeForeground[fadePos -3] = colors[cColor];
+		tgtManeForeground[fadePos -4] = colors[cColor];
 
 		vTaskDelay(20);
 
-//		level  = (esp_timer_get_time())/10000 % 300;
-//		if(level <= 30)
-//			mane.points[fadePos/10 % mane.points.size()].vel += 0.003;
+		level  = (esp_timer_get_time())/10000 % 300;
+		if(level <= 30)
+			mane.points[fadePos % mane.points.size()].vel += 0.003;
 
 		cColor = (esp_timer_get_time())/15000000 % 3;
 		fadePos = (10*16*esp_timer_get_time())/15000000;
