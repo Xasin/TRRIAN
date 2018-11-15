@@ -24,6 +24,7 @@ namespace Peripheral {
 
 		int length() const;
 
+		Color& get(int id);
 		Color& operator[](int id);
 		Color  operator[](int id) const;
 		Layer& operator=(const Layer& source);

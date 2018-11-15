@@ -16,13 +16,22 @@ int Layer::length() const {
 	return colors.size();
 }
 
-Color& Layer::operator[](int id) {
+Color& Layer::get(int id) {
 	id %= length();
+
+	if(id < 0)
+		id += length();
 
 	return colors[id];
 }
+
+Color& Layer::operator[](int id) {
+	return get(id);
+}
 Color Layer::operator[](int id) const {
 	id %= length();
+	if(id < 0)
+		id += length();
 
 	return colors[id];
 }
@@ -48,7 +57,7 @@ Layer& Layer::fill(Color fColor, int from, int to) {
 	}
 
 	for(int i=from; i<to; i++)
-		colors[i] = fColor;
+		this->get(i) = fColor;
 
 	return *this;
 }
@@ -65,7 +74,7 @@ Layer& Layer::merge_overlay(const Layer &top, int offset, bool wrap) {
 //	}
 
 	for(int i=from; i<to; i++) {
-		(*this)[i].merge_overlay(top[i-offset], top.alpha);
+		this->get(i).merge_overlay(top[i-offset], top.alpha);
 	}
 
 	return *this;
@@ -82,7 +91,7 @@ Layer& Layer::merge_multiply(const Layer &top, int offset, bool wrap) {
 	}
 
 	for(int i=from; i<to; i++) {
-		(*this)[i].merge_multiply(top[i-offset], top.alpha);
+		this->get(i).merge_multiply(top[i-offset], top.alpha);
 	}
 
 	return *this;
@@ -100,7 +109,7 @@ Layer& Layer::merge_multiply(const std::vector<uint8_t> &scalars, int offset, bo
 
 
 	for(int i=from; i<to; i++) {
-		(*this)[i].merge_multiply(scalars[i-offset]);
+		this->get(i).merge_multiply(scalars[i-offset]);
 	}
 
 	return *this;
@@ -117,7 +126,7 @@ Layer& Layer::merge_add(const Layer &top, int offset, bool wrap) {
 	}
 
 	for(int i=from; i<to; i++) {
-		(*this)[i].merge_add(top[i-offset], top.alpha);
+		this->get(i).merge_add(top[i-offset], top.alpha);
 	}
 
 	return *this;
