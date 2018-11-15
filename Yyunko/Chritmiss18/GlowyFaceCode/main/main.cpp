@@ -60,6 +60,7 @@ extern "C" void app_main(void)
 	Layer tgtBackground(16);
 	tgtBackground.alpha = 10;
 	Layer smBackground(16);
+	smBackground.fill(0xFF0000);
 
 	Layer tgtManeForeground(7);
 	tgtManeForeground.alpha = 30;
@@ -72,13 +73,16 @@ extern "C" void app_main(void)
 			mane.tick();
 
 			smBackground.merge_overlay(tgtBackground);
-			smManeForeground.merge_overlay(tgtManeForeground);
+//			smManeForeground.merge_overlay(tgtManeForeground);
+//
+//			animManeForeground = smManeForeground;
+//			animManeForeground.merge_multiply(mane.scalarPoints);
 
-			animManeForeground = smManeForeground;
+			animManeForeground.fill(0x0000FF);
 			animManeForeground.merge_multiply(mane.scalarPoints);
 
 			lightController->nextColors = smBackground;
-			lightController->nextColors.merge_overlay(animManeForeground, -3, true);
+			lightController->nextColors.merge_overlay(animManeForeground, 0, true);
 
 			lightController->apply();
 			lightController->update();
@@ -91,18 +95,14 @@ extern "C" void app_main(void)
 	xTaskCreate(&lambdaCaller, "Animator Thread", 4048, &animatorLambda, 3, &animatorTask);
 
 	while (true) {
-		tgtBackground[fadePos]    = 0x111111;
-		tgtBackground[fadePos -3] = backColors[cColor];
+		tgtBackground[fadePos] = backColors[cColor];
 		tgtManeForeground[fadePos -3] = colors[cColor];
-
-		lightController->apply();
-		lightController->update();
 
 		vTaskDelay(20);
 
-		level  = (esp_timer_get_time())/10000 % 300;
-		if(level <= 30)
-			mane.points[fadePos/10 % mane.points.size()].vel += 0.003;
+//		level  = (esp_timer_get_time())/10000 % 300;
+//		if(level <= 30)
+//			mane.points[fadePos/10 % mane.points.size()].vel += 0.003;
 
 		cColor = (esp_timer_get_time())/15000000 % 3;
 		fadePos = (10*16*esp_timer_get_time())/15000000;

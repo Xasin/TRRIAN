@@ -5,6 +5,8 @@ namespace Peripheral {
 
 Layer::Layer(const int length) : colors(length) {
 	alpha = 255;
+
+	fill(0);
 }
 Layer::Layer(const Layer &source) : colors(source.colors) {
 	alpha = source.alpha;
@@ -55,15 +57,15 @@ Layer& Layer::merge_overlay(const Layer &top, int offset, bool wrap) {
 	int from = offset;
 	int to   = offset + top.length();
 
-	if(!wrap) {
-		if(from < 0)
-			from = 0;
-		if(to > length())
-			to = length();
-	}
+//	if(!wrap) {
+//		if(from < 0)
+//			from = 0;
+//		if(to > length())
+//			to = length();
+//	}
 
 	for(int i=from; i<to; i++) {
-		(*this)[i+offset].merge_overlay(top[i], top.alpha);
+		(*this)[i].merge_overlay(top[i-offset], top.alpha);
 	}
 
 	return *this;
@@ -80,7 +82,7 @@ Layer& Layer::merge_multiply(const Layer &top, int offset, bool wrap) {
 	}
 
 	for(int i=from; i<to; i++) {
-		(*this)[i+offset].merge_multiply(top[i], top.alpha);
+		(*this)[i].merge_multiply(top[i-offset], top.alpha);
 	}
 
 	return *this;
@@ -98,7 +100,7 @@ Layer& Layer::merge_multiply(const std::vector<uint8_t> &scalars, int offset, bo
 
 
 	for(int i=from; i<to; i++) {
-		(*this)[i].merge_multiply(scalars[i]);
+		(*this)[i].merge_multiply(scalars[i-offset]);
 	}
 
 	return *this;
@@ -115,7 +117,7 @@ Layer& Layer::merge_add(const Layer &top, int offset, bool wrap) {
 	}
 
 	for(int i=from; i<to; i++) {
-		(*this)[i+offset].merge_add(top[i], top.alpha);
+		(*this)[i].merge_add(top[i-offset], top.alpha);
 	}
 
 	return *this;
