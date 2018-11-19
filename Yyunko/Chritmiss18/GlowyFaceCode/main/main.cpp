@@ -27,6 +27,10 @@ volatile uint8_t whoIs = 0;
 esp_err_t event_handler(void *ctx, system_event_t *event)
 {
 	switch(event->event_id) {
+    case SYSTEM_EVENT_STA_START:
+	puts("WiFi STA started!");
+        esp_wifi_connect();
+        break;
     case SYSTEM_EVENT_STA_GOT_IP:
     	puts("WiFi connected!");
     	break;
@@ -91,15 +95,15 @@ extern "C" void app_main(void)
 	ESP_ERROR_CHECK( esp_wifi_set_storage(WIFI_STORAGE_RAM) );
 	ESP_ERROR_CHECK( esp_wifi_set_mode(WIFI_MODE_STA) );
 
-	wifi_config_t wifi_cfg;
+	wifi_config_t wifi_cfg = {};
 	wifi_sta_config_t* sta_cfg = &(wifi_cfg.sta);
 
-	memcpy(sta_cfg->password, "f36eebda48", 11);
-	memcpy(sta_cfg->ssid, "TP-LINK_84CDC2", 15);
+	memcpy(sta_cfg->password, "f36eebda48\0", 11);
+	memcpy(sta_cfg->ssid, "TP-LINK_84CDC2\0", 15);
 
-	ESP_ERROR_CHECK( esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg) );
+	ESP_ERROR_CHECK( esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_cfg) );
 	ESP_ERROR_CHECK( esp_wifi_start() );
-	ESP_ERROR_CHECK( esp_wifi_connect() );
+	//ESP_ERROR_CHECK( esp_wifi_connect() );
 
 	esp_mqtt_client_config_t mqtt_cfg = {};
 	mqtt_cfg.event_handle = mqtt_evt_handle;
@@ -113,9 +117,6 @@ extern "C" void app_main(void)
 	esp_mqtt_client_start(mqtt_handle);
 
 	lightController = new NeoController(GPIO_NUM_14, RMT_CHANNEL_0, 16);
-
-	lightController->fill(Color(0xFFFFFF, 100));
-	lightController->fadeTransition(1000000);
 
 	struct ColorSet {
 		Color maneTop;
@@ -135,8 +136,8 @@ extern "C" void app_main(void)
 			maneTop: 	Material::CYAN,
 			maneBottom: Material::BLUE,
 			eye:		Material::CYAN,
-			upperFace:	Material::RED,
-			lowerFace:	Material::RED
+			upperFace:	Color(Material::RED, 110),
+			lowerFace:	Color(Material::RED, 110)
 	},
 		{
 			maneTop:	Material::YELLOW,
@@ -168,15 +169,15 @@ extern "C" void app_main(void)
 	Layer tgtBackground(16);
 	tgtBackground.alpha = 12;
 	Layer smBackground(16);
-	smBackground.fill(0xFF0000);
+	smBackground.fill(0);
 
 	Layer tgtManeForeground(8);
 	tgtManeForeground.alpha = 20;
 
 	Layer smManeForeground(8);
-	smManeForeground.alpha = 180;
+	smManeForeground.alpha = 230;
 	Layer animManeForeground(8);
-	animManeForeground.alpha = 180;
+	animManeForeground.alpha = 230;
 
 	std::function<void(void)> animatorLambda = [&]() {
 		uint64_t nextBlip = xTaskGetTickCount() + esp_random()%(3000/portTICK_PERIOD_MS);
@@ -184,9 +185,9 @@ extern "C" void app_main(void)
 		while(true) {
 			if(xTaskGetTickCount() >= nextBlip) {
 				puts("Blip!");
-				nextBlip = xTaskGetTickCount() + (esp_random()%(3000) + 3000)/portTICK_PERIOD_MS;
+				nextBlip = xTaskGetTickCount() + (esp_random()%(3000) + 1000)/portTICK_PERIOD_MS;
 
-				mane.points[esp_random() % mane.points.size()].vel += 0.01;
+				mane.points[esp_random() % mane.points.size()].vel += 0.016;
 			}
 
 			mane.tick();
@@ -210,7 +211,7 @@ extern "C" void app_main(void)
 	mainThread = xTaskGetCurrentTaskHandle();
 
 	TaskHandle_t animatorTask;
-	xTaskCreate(&lambdaCaller, "Animator Thread", 4048, &animatorLambda, 3, &animatorTask);
+	xTaskCreate(&lambdaCaller, "Animator Thread", 4048, &animatorLambda, 10, &animatorTask);
 
 	unsigned int whoIsBuffer = 1;
 	while (true) {
@@ -223,7 +224,7 @@ extern "C" void app_main(void)
 		ColorSet& currentSet = colorSets[whoIs];
 
 		for(uint8_t i=0; i<mane.points.size(); i++) {
-			mane.points[i].vel += 0.003;
+			mane.points[i].vel += 0.01;
 
 			tgtManeForeground[i] = currentSet.maneTop;
 			tgtBackground[i] = currentSet.maneBottom;

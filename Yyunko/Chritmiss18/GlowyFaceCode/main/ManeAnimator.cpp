@@ -16,11 +16,11 @@ ManeAnimator::ManeAnimator(const int length) :
 	}
 
 	basePoint = 0.3;
-	baseTug = 0.0001;
+	baseTug = 0.0003;
 
-	dampening = 0.99;
+	dampening = 0.995;
 
-	ptpTug = 0.015;
+	ptpTug = 0.013;
 
 	wrap = false;
 }
