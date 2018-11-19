@@ -49,14 +49,42 @@ extern "C" void app_main(void)
 	int level = 0;
 	int fadePos = 0;
 	int cColor = 0;
-	uint32_t colors[]	  = {Material::CYAN, Material::YELLOW, Material::PURPLE};
-	uint32_t backColors[] = {Material::BLUE, Material::AMBER, Material::DEEP_PURPLE};
-	uint32_t baseColors[] = {Material::RED,  Material::BLUE,  Material::GREEN};
 
-	lightController->fill(Color(Material::RED, 90));
+	struct ColorSet {
+		Color maneTop;
+		Color maneBottom;
+		Color eye;
+		Color upperFace;
+		Color lowerFace;
+	};
+
+	ColorSet colorSets[] = {
+		{
+			maneTop: 	Material::CYAN,
+			maneBottom: Material::BLUE,
+			eye:		Material::CYAN,
+			upperFace:	Material::RED,
+			lowerFace:	Material::RED
+	},
+		{
+			maneTop:	Material::YELLOW,
+			maneBottom:	Material::DEEP_ORANGE,
+			eye:		Material::ORANGE,
+			upperFace:	Material::BLUE,
+			lowerFace:	0xFFFFFF
+	},	{
+			maneTop:	Material::PURPLE,
+			maneBottom:	Material::DEEP_PURPLE,
+			eye:		Material::PURPLE,
+			upperFace:	Material::GREEN,
+			lowerFace:	Material::GREEN
+		}
+	};
+
+	lightController->fill(0);
 
 	ManeAnimator mane(8);
-	mane.wrap = true;
+	mane.wrap = false;
 
 	Layer tgtBackground(16);
 	tgtBackground.alpha = 12;
@@ -108,6 +136,8 @@ extern "C" void app_main(void)
 		if(++whoIs >= 3)
 			whoIs = 0;
 
+		ColorSet& currentSet = colorSets[whoIs];
+
 		tgtBackground.fill(0, 8, 16);
 		tgtBackground.alpha = 6;
 		vTaskDelay(2000/portTICK_PERIOD_MS);
@@ -116,13 +146,15 @@ extern "C" void app_main(void)
 		for(uint8_t i=0; i<mane.points.size(); i++) {
 			mane.points[i].vel += 0.003;
 
-			tgtManeForeground[i] = colors[whoIs];
-			tgtBackground[i] = backColors[whoIs];
+			tgtManeForeground[i] = currentSet.maneTop;
+			tgtBackground[i] = currentSet.maneBottom;
 
 			vTaskDelay(100/portTICK_PERIOD_MS);
 		}
 
-		tgtBackground.fill(Color(baseColors[whoIs], 90), 8, 16);
+		tgtBackground.fill(currentSet.upperFace, 8, 11);
+		tgtBackground.fill(currentSet.lowerFace, 11, 13);
+		tgtBackground.fill(currentSet.upperFace, 13, 16);
 		tgtBackground.alpha = 6;
 
 		vTaskDelay(30000/portTICK_PERIOD_MS);
