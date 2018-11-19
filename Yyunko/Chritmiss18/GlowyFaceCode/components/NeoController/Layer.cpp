@@ -37,6 +37,7 @@ Color Layer::operator[](int id) const {
 }
 Layer& Layer::operator=(const Layer& source) {
 	this->colors = source.colors;
+	this->alpha = source.alpha;
 
 	return *this;
 }

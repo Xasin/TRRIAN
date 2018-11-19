@@ -20,7 +20,7 @@ ManeAnimator::ManeAnimator(const int length) :
 
 	dampening = 0.99;
 
-	ptpTug = 0.025;
+	ptpTug = 0.015;
 
 	wrap = false;
 }

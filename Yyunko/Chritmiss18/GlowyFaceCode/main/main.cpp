@@ -51,6 +51,7 @@ extern "C" void app_main(void)
 	int cColor = 0;
 	uint32_t colors[]	  = {Material::CYAN, Material::YELLOW, Material::PURPLE};
 	uint32_t backColors[] = {Material::BLUE, Material::AMBER, Material::DEEP_PURPLE};
+	uint32_t baseColors[] = {Material::RED,  Material::BLUE,  Material::GREEN};
 
 	lightController->fill(Color(Material::RED, 90));
 
@@ -63,14 +64,24 @@ extern "C" void app_main(void)
 	smBackground.fill(0xFF0000);
 
 	Layer tgtManeForeground(8);
-	tgtManeForeground.alpha = 40;
+	tgtManeForeground.alpha = 20;
 
 	Layer smManeForeground(8);
-	smManeForeground.alpha = 200;
+	smManeForeground.alpha = 180;
 	Layer animManeForeground(8);
+	animManeForeground.alpha = 180;
 
 	std::function<void(void)> animatorLambda = [&]() {
+		uint64_t nextBlip = xTaskGetTickCount() + esp_random()%(3000/portTICK_PERIOD_MS);
+
 		while(true) {
+			if(xTaskGetTickCount() >= nextBlip) {
+				puts("Blip!");
+				nextBlip = xTaskGetTickCount() + (esp_random()%(3000) + 3000)/portTICK_PERIOD_MS;
+
+				mane.points[esp_random() % mane.points.size()].vel += 0.01;
+			}
+
 			mane.tick();
 
 			smBackground.merge_overlay(tgtBackground);
@@ -80,7 +91,7 @@ extern "C" void app_main(void)
 			animManeForeground.merge_multiply(mane.scalarPoints);
 
 			lightController->nextColors = smBackground;
-			lightController->nextColors.merge_overlay(animManeForeground, -4, true);
+			lightController->nextColors.merge_overlay(animManeForeground, 0, true);
 
 			lightController->apply();
 			lightController->update();
@@ -92,21 +103,28 @@ extern "C" void app_main(void)
 	TaskHandle_t animatorTask;
 	xTaskCreate(&lambdaCaller, "Animator Thread", 4048, &animatorLambda, 3, &animatorTask);
 
+	uint8_t whoIs = 0;
 	while (true) {
-		tgtBackground[fadePos] = backColors[cColor];
-		tgtManeForeground[fadePos -4] = colors[cColor];
+		if(++whoIs >= 3)
+			whoIs = 0;
 
-		vTaskDelay(20);
+		tgtBackground.fill(0, 8, 16);
+		tgtBackground.alpha = 6;
+		vTaskDelay(2000/portTICK_PERIOD_MS);
+		tgtBackground.alpha = 12;
 
-		level  = (esp_timer_get_time())/10000 % 300;
-		if(level <= 30)
-			mane.points[fadePos % mane.points.size()].vel += 0.003;
+		for(uint8_t i=0; i<mane.points.size(); i++) {
+			mane.points[i].vel += 0.003;
 
-		cColor = (esp_timer_get_time())/15000000 % 3;
-		fadePos = (10*16*esp_timer_get_time())/15000000;
+			tgtManeForeground[i] = colors[whoIs];
+			tgtBackground[i] = backColors[whoIs];
 
-		int shiftFadePos = (fadePos + 3) % (10*16);
-		if(shiftFadePos < mane.points.size())
-			mane.points[shiftFadePos].vel += 0.0012;
+			vTaskDelay(100/portTICK_PERIOD_MS);
+		}
+
+		tgtBackground.fill(Color(baseColors[whoIs], 90), 8, 16);
+		tgtBackground.alpha = 6;
+
+		vTaskDelay(30000/portTICK_PERIOD_MS);
 	}
 }
