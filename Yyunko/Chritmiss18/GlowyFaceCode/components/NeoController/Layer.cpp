@@ -133,4 +133,15 @@ Layer& Layer::merge_add(const Layer &top, int offset, bool wrap) {
 	return *this;
 }
 
+Layer& Layer::alpha_set(const std::vector<uint8_t> &newAlphas) {
+	int to = newAlphas.size();
+	if(to > this->length())
+		to = this->length();
+
+	for(int i=0; i<to; i++)
+		colors[i].alpha = newAlphas[i];
+
+	return *this;
+}
+
 }
