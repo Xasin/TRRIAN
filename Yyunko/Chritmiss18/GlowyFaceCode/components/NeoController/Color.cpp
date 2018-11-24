@@ -23,9 +23,9 @@ Color::Color(uint32_t cCode, uint8_t brightness) : Color() {
 
 Color::ColorData Color::getLEDValue() const {
 	ColorData out = {};
-	out.r = ((uint16_t)r*r)>>8;
-	out.g = ((uint16_t)g*g)>>8;
-	out.b = ((uint16_t)b*b)>>8;
+	out.r = ((uint32_t)r*r)/0xFFFFFF;
+	out.g = ((uint32_t)g*g)/0xFFFFFF;
+	out.b = ((uint32_t)b*b)/0xFFFFFF;
 
 	return out;
 }
@@ -37,9 +37,9 @@ void Color::set(Color color) {
 }
 void Color::set(uint32_t cCode) {
 	uint8_t *colorPart = (uint8_t *)&cCode;
-	r = colorPart[2];
-	g = colorPart[1];
-	b = colorPart[0];
+	r = uint16_t(colorPart[2])*257;
+	g = uint16_t(colorPart[1])*257;
+	b = uint16_t(colorPart[0])*257;
 }
 void Color::set(uint32_t cCode, uint8_t factor) {
 	set(cCode);
@@ -52,10 +52,11 @@ Color& Color::operator=(const Color& nColor) {
 }
 
 void Color::bMod(uint8_t factor) {
-	uint16_t bFact = factor;
-	r = ((r*bFact)>>8) + ((r*bFact & 0x80) != 0);
-	g = ((g*bFact)>>8) + ((g*bFact & 0x80) != 0);
-	b = ((b*bFact)>>8) + ((b*bFact & 0x80) != 0);
+	uint32_t bFact = factor;
+
+	r = ((r*bFact)/255);
+	g = ((g*bFact)/255);
+	b = ((b*bFact)/255);
 }
 
 Color Color::overlay(Color topColor, uint8_t alpha) {
@@ -68,13 +69,13 @@ Color Color::overlay(Color topColor, uint8_t alpha) {
 }
 void Color::overlay(Color bottom, Color top, uint8_t alpha) {
 	for(uint8_t i=0; i<3; i++)
-		*(&(this->r) + i) = ((uint16_t)*(&bottom.r + i)*(255 - alpha) + *(&top.r +i)*(alpha)) >> 8;
+		(&this->r)[i] = (uint32_t((&bottom.r)[i])*(255 - alpha) + (&top.r)[i]*(alpha))/255;
 }
 
 Color Color::operator +(Color secondColor) {
 	Color oColor = *this;
 	for(uint8_t i=0; i<3; i++)
-		*(&(oColor.r) + i) = *(&secondColor.r + i) + *(&this->r + i);
+		(&(oColor.r))[i] = (&secondColor.r)[i] + (&this->r)[i];
 
 	return oColor;
 }
@@ -86,35 +87,35 @@ Color Color::operator *(uint8_t brightness) {
 }
 
 Color& Color::merge_overlay(const Color &top, uint8_t alpha) {
-	uint16_t total_alpha = (top.alpha * uint16_t(alpha))>>8;
+	uint16_t total_alpha = (top.alpha * uint16_t(alpha));
 
 	for(uint8_t i=0; i<4; i++)
-		*(&this->r +i) = (*(&top.r +i)*total_alpha + *(&this->r +i)*(255-total_alpha))>>8;
+		(&this->r)[i] = ((&top.r)[i]*total_alpha + (&this->r)[i]*(65025-total_alpha))/(65025);
 
 	return *this;
 }
 Color& Color::merge_multiply(const Color &top, uint8_t alpha) {
-	uint16_t total_alpha = (top.alpha * uint16_t(alpha)) >> 8;
+	uint32_t total_alpha = (top.alpha * uint16_t(alpha));
 
 	for(uint8_t i=0; i<3; i++)
-		*(&r +i) = (*(&r +i) * (255-total_alpha + (total_alpha*(*(&top.r+i))>>8)))>>8;
+		(&r)[i] = ((&r)[i] * (65025-total_alpha + (total_alpha*((&top.r)[i])/65025)))/65025;
 
 	return *this;
 }
 Color& Color::merge_multiply(uint8_t scalar) {
 	for(uint8_t i=0; i<3; i++)
-		*(&r +i) = (*(&r +i)*uint16_t(scalar)) >> 8;
+		(&r)[i] = ((&r)[i]*uint32_t(scalar)) / 255;
 
 	return *this;
 }
 Color& Color::merge_add(const Color &top, uint8_t alpha) {
-	uint16_t total_alpha = (top.alpha * uint16_t(alpha)) >> 8;
+	uint8_t total_alpha = (top.alpha * uint16_t(alpha))/255;
 
 	for(uint8_t i=0; i<3; i++) {
-		uint8_t& c = *(&r +i);
-		uint16_t cB = c + *(&top.r +i);
-		if(cB > 255)
-			cB = 255;
+		uint16_t& c = (&r)[i];
+		uint32_t cB = c + (&top.r)[i];
+		if(cB > 65535)
+			cB = 65535;
 
 		c = cB;
 	}
