@@ -70,7 +70,7 @@ void NeoController::update() {
 	for(uint8_t i=0; i<length; i++)
 		writeData[i] = colors[i].getLEDValue();
 
-	rmt_write_sample(channel, reinterpret_cast<const unsigned char *>(writeData), length*3, true);
+	rmt_write_sample(channel, reinterpret_cast<const unsigned char *>(writeData), length*sizeof(Color::ColorData), true);
 	delete writeData;
 
 	esp_pm_lock_release(powerLock);

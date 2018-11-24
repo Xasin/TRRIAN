@@ -84,6 +84,11 @@ void lambdaCaller(void *arg) {
 	(*reinterpret_cast<std::function<void(void)>*>(arg))();
 }
 
+void printC(Color &c) {
+	auto ledVals = c.getLEDValue();
+	printf("Colour values R:%d, G:%d, B:%d (LED: R:%d G:%d B:%d)\n", c.r, c.g, c.b, ledVals.r, ledVals.g, ledVals.b);
+}
+
 extern "C" void app_main(void)
 {
 	nvs_flash_init();
@@ -116,7 +121,7 @@ extern "C" void app_main(void)
 	auto mqtt_handle = esp_mqtt_client_init(&mqtt_cfg);
 	esp_mqtt_client_start(mqtt_handle);
 
-	lightController = new NeoController(GPIO_NUM_14, RMT_CHANNEL_0, 16);
+	lightController = new NeoController(GPIO_NUM_14, RMT_CHANNEL_0, 20);
 
 	struct ColorSet {
 		Color maneTop;
@@ -136,8 +141,8 @@ extern "C" void app_main(void)
 			maneTop: 	Material::CYAN,
 			maneBottom: Material::BLUE,
 			eye:		Material::CYAN,
-			upperFace:	Color(Material::RED, 110),
-			lowerFace:	Color(Material::RED, 110)
+			upperFace:	Color(Material::RED, 180),
+			lowerFace:	Color(Material::RED, 180)
 	},
 		{
 			maneTop:	Material::YELLOW,
@@ -149,8 +154,8 @@ extern "C" void app_main(void)
 			maneTop:	Material::PURPLE,
 			maneBottom:	Material::DEEP_PURPLE,
 			eye:		Material::PURPLE,
-			upperFace:	Material::GREEN,
-			lowerFace:	Material::GREEN
+			upperFace:	0x10FF15,
+			lowerFace:	0x10FF15
 		},
 		{
 			maneTop:	0xFFFFFF,
@@ -166,18 +171,18 @@ extern "C" void app_main(void)
 	ManeAnimator mane(8);
 	mane.wrap = false;
 
-	Layer tgtBackground(16);
+	Layer tgtBackground(20);
 	tgtBackground.alpha = 12;
-	Layer smBackground(16);
+	Layer smBackground(20);
 	smBackground.fill(0);
 
 	Layer tgtManeForeground(8);
-	tgtManeForeground.alpha = 20;
+	tgtManeForeground.alpha = 15;
 
 	Layer smManeForeground(8);
-	smManeForeground.alpha = 230;
+	smManeForeground.alpha = 170;
 	Layer animManeForeground(8);
-	animManeForeground.alpha = 230;
+	animManeForeground.alpha = 150;
 
 	std::function<void(void)> animatorLambda = [&]() {
 		uint64_t nextBlip = xTaskGetTickCount() + esp_random()%(3000/portTICK_PERIOD_MS);
@@ -199,7 +204,7 @@ extern "C" void app_main(void)
 			animManeForeground.merge_multiply(mane.scalarPoints);
 
 			lightController->nextColors = smBackground;
-			lightController->nextColors.merge_overlay(animManeForeground, 0, true);
+			lightController->nextColors.merge_overlay(animManeForeground);
 
 			lightController->apply();
 			lightController->update();
@@ -211,12 +216,12 @@ extern "C" void app_main(void)
 	mainThread = xTaskGetCurrentTaskHandle();
 
 	TaskHandle_t animatorTask;
-	xTaskCreate(&lambdaCaller, "Animator Thread", 4048, &animatorLambda, 10, &animatorTask);
+	xTaskCreatePinnedToCore(&lambdaCaller, "Animator Thread", 6*1024, &animatorLambda, 3, &animatorTask, 0);
 
 	unsigned int whoIsBuffer = 1;
 	while (true) {
-		tgtBackground.fill(0, 8, 16);
-		tgtBackground.alpha = 6;
+		tgtBackground.fill(0, 8, 20);
+		tgtBackground.alpha = 2;
 		vTaskDelay(2000/portTICK_PERIOD_MS);
 		tgtBackground.alpha = 12;
 
@@ -229,13 +234,14 @@ extern "C" void app_main(void)
 			tgtManeForeground[i] = currentSet.maneTop;
 			tgtBackground[i] = currentSet.maneBottom;
 
-			vTaskDelay(100/portTICK_PERIOD_MS);
+			vTaskDelay(200/portTICK_PERIOD_MS);
 		}
 
-		tgtBackground.fill(currentSet.upperFace, 8, 11);
-		tgtBackground.fill(currentSet.lowerFace, 11, 13);
-		tgtBackground.fill(currentSet.upperFace, 13, 16);
-		tgtBackground.alpha = 6;
+		tgtBackground.fill(currentSet.upperFace, 8, 15);
+		tgtBackground.fill(currentSet.lowerFace, 15, 18);
+		tgtBackground.fill(0xAAAAAA, 18, 20);
+
+		tgtBackground.alpha = 1;
 
 		xTaskNotifyWait(0, 0, &whoIsBuffer, portMAX_DELAY);
 	}
