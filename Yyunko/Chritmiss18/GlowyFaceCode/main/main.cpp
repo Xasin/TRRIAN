@@ -12,17 +12,38 @@
 
 #include "mqtt_client.h"
 
-
 #include "NeoController.h"
+#include "Control.h"
 
 #include "ManeAnimator.h"
 
+#include "MasterAction.h"
+
+#include "WifiPasswd.h"
+
 using namespace Peripheral;
+using namespace XaI2C;
 
 NeoController *lightController = nullptr;
 TaskHandle_t mainThread = nullptr;
 
+volatile uint8_t MQTT_whoIs = 1;
+volatile bool  is_enabled = true;
+
 volatile uint8_t whoIs = 0;
+
+void I2CTest() {
+	MasterAction::init(GPIO_NUM_25, GPIO_NUM_26);
+
+	MasterAction testWrite = MasterAction(0b0111100);
+
+	testWrite.write(0xAF);
+	testWrite.write(0xA5);
+
+	testWrite.execute();
+
+	puts("CMD should be written!");
+}
 
 esp_err_t event_handler(void *ctx, system_event_t *event)
 {
@@ -44,6 +65,13 @@ esp_err_t event_handler(void *ctx, system_event_t *event)
 	return ESP_OK;
 }
 
+void update_current_color() {
+	if(is_enabled)
+		xTaskNotify(mainThread, MQTT_whoIs, eSetValueWithOverwrite);
+	else
+		xTaskNotify(mainThread, 4, eSetValueWithOverwrite);
+}
+
 esp_err_t mqtt_evt_handle(esp_mqtt_event_handle_t event) {
 
 	switch(event->event_id) {
@@ -54,23 +82,20 @@ esp_err_t mqtt_evt_handle(esp_mqtt_event_handle_t event) {
 		esp_mqtt_client_publish(event->client, "Personal/Yyunko/XaHead/Connected", "OK", 3, 1, true);
 	break;
 	case MQTT_EVENT_DATA: {
-		puts("MQTT got data!");
-
 		std::string topic(event->topic, event->topic_len);
 		if(topic == "Personal/Yyunko/XaHead/Who") {
-			uint8_t whoIsNum = 0;
+			MQTT_whoIs = 0;
 
 			std::string whoIs(event->data, event->data_len);
 			if(whoIs == "Xasin")
-				whoIsNum = 1;
+				MQTT_whoIs = 1;
 			else if(whoIs == "Neira")
-				whoIsNum = 2;
+				MQTT_whoIs = 2;
 			else if(whoIs == "Mesh")
-				whoIsNum = 3;
-			else if(whoIs == "Mixed")
-				whoIsNum = 4;
+				MQTT_whoIs = 3;
 
-			xTaskNotify(mainThread, whoIsNum, eSetValueWithOverwrite);
+			if(is_enabled)
+				update_current_color();
 		}
 	}
 	break;
@@ -82,11 +107,6 @@ esp_err_t mqtt_evt_handle(esp_mqtt_event_handle_t event) {
 
 void lambdaCaller(void *arg) {
 	(*reinterpret_cast<std::function<void(void)>*>(arg))();
-}
-
-void printC(Color &c) {
-	auto ledVals = c.getLEDValue();
-	printf("Colour values R:%d, G:%d, B:%d (LED: R:%d G:%d B:%d)\n", c.r, c.g, c.b, ledVals.r, ledVals.g, ledVals.b);
 }
 
 extern "C" void app_main(void)
@@ -103,8 +123,8 @@ extern "C" void app_main(void)
 	wifi_config_t wifi_cfg = {};
 	wifi_sta_config_t* sta_cfg = &(wifi_cfg.sta);
 
-	memcpy(sta_cfg->password, "f36eebda48\0", 11);
-	memcpy(sta_cfg->ssid, "TP-LINK_84CDC2\0", 15);
+	memcpy(sta_cfg->password, WIFI_PASSWD, strlen(WIFI_PASSWD));
+	memcpy(sta_cfg->ssid, WIFI_SSID, strlen(WIFI_SSID));
 
 	ESP_ERROR_CHECK( esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_cfg) );
 	ESP_ERROR_CHECK( esp_wifi_start() );
@@ -133,7 +153,7 @@ extern "C" void app_main(void)
 
 	ColorSet colorSets[] = {
 		{
-			maneTop:    Color(0x333333),
+			maneTop:    Color(0x666666),
 			maneBottom: 0,
 			eye: 0, upperFace: 0, lowerFace: 0
 		},
@@ -141,28 +161,26 @@ extern "C" void app_main(void)
 			maneTop: 	Material::CYAN,
 			maneBottom: Material::BLUE,
 			eye:		Material::CYAN,
-			upperFace:	Color(Material::RED, 180),
-			lowerFace:	Color(Material::RED, 180)
+			upperFace:	Color(Material::RED, 130),
+			lowerFace:	Color(Material::RED, 130)
 	},
 		{
 			maneTop:	Material::YELLOW,
 			maneBottom:	Material::DEEP_ORANGE,
 			eye:		Material::ORANGE,
-			upperFace:	Material::BLUE,
-			lowerFace:	0xFFFFFF
+			upperFace:	Color(Material::BLUE, 110),
+			lowerFace:	Color(0xFFFFFF, 90)
 	},	{
 			maneTop:	Material::PURPLE,
 			maneBottom:	Material::DEEP_PURPLE,
 			eye:		Material::PURPLE,
-			upperFace:	0x10FF15,
-			lowerFace:	0x10FF15
+			upperFace:	Color(0x03FF06, 105),
+			lowerFace:	Color(0x03FF06, 105)
 		},
 		{
-			maneTop:	0xFFFFFF,
-			maneBottom: 0xFFFFFF,
-			eye:		0xFFFFFF,
-			upperFace:	0xFFFFFF,
-			lowerFace:	0xFFFFFF,
+			maneTop:    0,
+			maneBottom: 0,
+			eye: 0, upperFace: 0, lowerFace: 0
 		}
 	};
 
@@ -170,6 +188,7 @@ extern "C" void app_main(void)
 
 	ManeAnimator mane(8);
 	mane.wrap = false;
+	mane.basePoint = 0.4;
 
 	Layer tgtBackground(20);
 	tgtBackground.alpha = 12;
@@ -180,7 +199,7 @@ extern "C" void app_main(void)
 	tgtManeForeground.alpha = 15;
 
 	Layer smManeForeground(8);
-	smManeForeground.alpha = 170;
+	smManeForeground.alpha = 190;
 	Layer animManeForeground(8);
 	animManeForeground.alpha = 150;
 
@@ -209,16 +228,37 @@ extern "C" void app_main(void)
 			lightController->apply();
 			lightController->update();
 
-			vTaskDelay(10);
+			vTaskDelay(15);
+		}
+	};
+
+	std::function<void(void)> switchLambda = []() {
+		Touch::Control touchy = Touch::Control(TOUCH_PAD_NUM5);
+		touchy.charDetectHandle = xTaskGetCurrentTaskHandle();
+
+		uint32_t touchStatus = false;
+		while(true) {
+			xTaskNotifyWait(0, 0, &touchStatus, portMAX_DELAY);
+			if(touchStatus) {
+				is_enabled = !is_enabled;
+
+				printf("Switching system: %d\n", is_enabled);
+				update_current_color();
+				vTaskDelay(1000/portTICK_PERIOD_MS);
+			}
 		}
 	};
 
 	mainThread = xTaskGetCurrentTaskHandle();
 
 	TaskHandle_t animatorTask;
-	xTaskCreatePinnedToCore(&lambdaCaller, "Animator Thread", 6*1024, &animatorLambda, 3, &animatorTask, 0);
+	xTaskCreatePinnedToCore(&lambdaCaller, "Animator Thread", 6*1024, &animatorLambda, configMAX_PRIORITIES - 3, &animatorTask, 0);
 
-	unsigned int whoIsBuffer = 1;
+	TaskHandle_t switchTask;
+	xTaskCreate(&lambdaCaller, "Switch", 2048, &switchLambda, 3, &switchTask);
+
+	unsigned int whoIsBuffer = MQTT_whoIs;
+
 	while (true) {
 		tgtBackground.fill(0, 8, 20);
 		tgtBackground.alpha = 2;
@@ -239,9 +279,10 @@ extern "C" void app_main(void)
 
 		tgtBackground.fill(currentSet.upperFace, 8, 15);
 		tgtBackground.fill(currentSet.lowerFace, 15, 18);
-		tgtBackground.fill(0xAAAAAA, 18, 20);
+		if((whoIs != 0) && (whoIs != 4))
+			tgtBackground.fill(0x555555, 18, 20);
 
-		tgtBackground.alpha = 1;
+		tgtBackground.alpha = 2;
 
 		xTaskNotifyWait(0, 0, &whoIsBuffer, portMAX_DELAY);
 	}
