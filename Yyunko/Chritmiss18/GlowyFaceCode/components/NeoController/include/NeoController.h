@@ -30,6 +30,8 @@ private:
 	const gpio_num_t pinNo;
 	const rmt_channel_t channel;
 
+	Color::ColorData *rawColors;
+
 	esp_pm_lock_handle_t powerLock;
 
 public:
