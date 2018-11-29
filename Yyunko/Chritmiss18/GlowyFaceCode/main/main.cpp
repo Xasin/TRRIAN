@@ -37,8 +37,10 @@ void I2CTest() {
 
 	MasterAction testWrite = MasterAction(0b0111100);
 
-	testWrite.write(0xAF);
-	testWrite.write(0xA5);
+	char cmdString[] = {0xAF, 0xA5, 0x81, 0x7F};
+	testWrite.write(0x80, cmdString, 1);
+	testWrite.write(0x80, cmdString+1, 1);
+	testWrite.write(0x00, cmdString+2, 2);
 
 	testWrite.execute();
 
@@ -113,6 +115,9 @@ extern "C" void app_main(void)
 {
 	nvs_flash_init();
 	tcpip_adapter_init();
+
+	I2CTest();
+
 	ESP_ERROR_CHECK( esp_event_loop_init(event_handler, NULL) );
 	wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
 
