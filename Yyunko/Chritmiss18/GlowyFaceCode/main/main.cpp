@@ -116,7 +116,7 @@ extern "C" void app_main(void)
 	nvs_flash_init();
 	tcpip_adapter_init();
 
-	I2CTest();
+	//I2CTest();
 
 	ESP_ERROR_CHECK( esp_event_loop_init(event_handler, NULL) );
 	wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
@@ -166,21 +166,21 @@ extern "C" void app_main(void)
 			maneTop: 	Material::CYAN,
 			maneBottom: Material::BLUE,
 			eye:		Material::CYAN,
-			upperFace:	Color(Material::RED, 130),
-			lowerFace:	Color(Material::RED, 130)
+			upperFace:	Color(Material::RED, 100),
+			lowerFace:	Color(Material::RED, 100)
 	},
 		{
 			maneTop:	Material::YELLOW,
 			maneBottom:	Material::DEEP_ORANGE,
 			eye:		Material::ORANGE,
 			upperFace:	Color(Material::BLUE, 110),
-			lowerFace:	Color(0xFFFFFF, 90)
+			lowerFace:	Color(0xFFFFFF, 87)
 	},	{
 			maneTop:	Material::PURPLE,
 			maneBottom:	Material::DEEP_PURPLE,
 			eye:		Material::PURPLE,
-			upperFace:	Color(0x03FF06, 105),
-			lowerFace:	Color(0x03FF06, 105)
+			upperFace:	Color(0x03FF06, 90),
+			lowerFace:	Color(0x03FF06, 90)
 		},
 		{
 			maneTop:    0,
@@ -243,11 +243,16 @@ extern "C" void app_main(void)
 
 		uint32_t touchStatus = false;
 		while(true) {
+			vTaskDelay(100);
+			printf("Switching system: %d\n", touchy.read_raw());
+		}
+
+		while(true) {
 			xTaskNotifyWait(0, 0, &touchStatus, portMAX_DELAY);
 			if(touchStatus) {
 				is_enabled = !is_enabled;
 
-				printf("Switching system: %d\n", is_enabled);
+				printf("Switching system: %d\n", touchy.read_raw());
 				update_current_color();
 				vTaskDelay(1000/portTICK_PERIOD_MS);
 			}

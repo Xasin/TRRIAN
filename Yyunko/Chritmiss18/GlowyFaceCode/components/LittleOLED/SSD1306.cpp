@@ -5,7 +5,7 @@
  *      Author: xasin
  */
 
-#include <components/LittleOLED/SSD1306.h>
+#include "SSD1306.h"
 
 namespace Peripheral {
 namespace OLED {
