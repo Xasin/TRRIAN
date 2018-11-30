@@ -17,7 +17,7 @@
 
 #include "ManeAnimator.h"
 
-#include "MasterAction.h"
+#include "SSD1306.h"
 
 #include "WifiPasswd.h"
 
@@ -33,16 +33,9 @@ volatile bool  is_enabled = true;
 volatile uint8_t whoIs = 0;
 
 void I2CTest() {
-	MasterAction::init(GPIO_NUM_25, GPIO_NUM_26);
+	XaI2C::MasterAction::init(GPIO_NUM_25, GPIO_NUM_26);
 
-	MasterAction testWrite = MasterAction(0b0111100);
-
-	char cmdString[] = {0xAF, 0xA5, 0x81, 0x7F};
-	testWrite.write(0x80, cmdString, 1);
-	testWrite.write(0x80, cmdString+1, 1);
-	testWrite.write(0x00, cmdString+2, 2);
-
-	testWrite.execute();
+	auto testI2C = new OLED::SSD1306();
 
 	puts("CMD should be written!");
 }
@@ -116,7 +109,7 @@ extern "C" void app_main(void)
 	nvs_flash_init();
 	tcpip_adapter_init();
 
-	//I2CTest();
+	I2CTest();
 
 	ESP_ERROR_CHECK( esp_event_loop_init(event_handler, NULL) );
 	wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
@@ -243,7 +236,7 @@ extern "C" void app_main(void)
 
 		uint32_t touchStatus = false;
 		while(true) {
-			vTaskDelay(100);
+			vTaskDelay(2000);
 			printf("Switching system: %d\n", touchy.read_raw());
 		}
 
