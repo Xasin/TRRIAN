@@ -8,6 +8,8 @@
 #ifndef COMPONENTS_LITTLEOLED_SSD1306_H_
 #define COMPONENTS_LITTLEOLED_SSD1306_H_
 
+#include <vector>
+#include <array>
 #include "MasterAction.h"
 
 namespace Peripheral {
@@ -24,7 +26,7 @@ public:
 	enum SINGLE_CMD : uint8_t {
 		DISPLAY_RAM		= 0xA4,
 		DISPLAY_ALLON	= 0xA5,
-		DISPLAY_NORMAL	= 0xA6,
+		DISPLAY_NONINV	= 0xA6,
 		DISPLAY_INVERTED= 0xA7,
 		DISPLAY_OFF		= 0xAE,
 		DISPLAY_ON		= 0xAF,
@@ -50,16 +52,31 @@ public:
 private:
 
 	XaI2C::MasterAction *currentAction;
+	std::vector<char> cmdBuffer;
 
-	void start_i2c_set();
+	std::array<std::array<uint8_t, 128>, 4> screenBuffer;
+
+	void start_cmd_set();
 
 	void send_cmd(uint8_t cmdVal);
 	void send_cmd(uint8_t cmdVal, uint8_t extraByte);
 
-	void end_i2c_set();
+	void end_cmd_set();
+
+	void data_write(void *data, size_t length);
 
 public:
+
 	SSD1306();
+
+	void set_coordinates(uint8_t column = 0, uint8_t page = 0, uint8_t maxColumn = 127, uint8_t maxPage = 3);
+
+	void push_entire_screen();
+
+	void set_pixel(uint8_t x, uint8_t y, bool on = true);
+
+	void write_char(char c, uint8_t x, uint8_t y, bool invert=false);
+	void write_string(std::string input, uint8_t x, uint8_t y, bool invert=false);
 };
 
 } /* namespace OLED */
