@@ -5,6 +5,7 @@
 #include "freertos/FreeRTOS.h"
 #include "esp_wifi.h"
 #include "esp_system.h"
+#include "esp_log.h"
 #include "esp_event.h"
 #include "esp_event_loop.h"
 #include "nvs_flash.h"
@@ -18,6 +19,7 @@
 #include "ManeAnimator.h"
 
 #include "SSD1306.h"
+#include "LittleConsole.h"
 
 #include "WifiPasswd.h"
 
@@ -32,10 +34,30 @@ volatile bool  is_enabled = true;
 
 volatile uint8_t whoIs = 0;
 
+OLED::SSD1306 screen = OLED::SSD1306();
+OLED::LittleConsole console(screen);
+
+char *vsprintfBuffer = new char[255];
+
+int vprintf_like(const char *input, va_list args) {
+	int printedLength = vsprintf(vsprintfBuffer, input, args);
+
+	console.printf(vsprintfBuffer + 8);
+	return printedLength;
+}
+
 void I2CTest() {
 	XaI2C::MasterAction::init(GPIO_NUM_25, GPIO_NUM_26);
 
-	auto testI2C = new OLED::SSD1306();
+	screen.initialize();
+
+	for(uint8_t i=0; i<11; i++) {
+		console.printf("Test no. %d!\n", i);
+
+		vTaskDelay(200);
+	}
+
+	esp_log_set_vprintf(vprintf_like);
 
 	puts("CMD should be written!");
 }
@@ -109,9 +131,8 @@ extern "C" void app_main(void)
 	nvs_flash_init();
 	tcpip_adapter_init();
 
-	I2CTest();
-
 	ESP_ERROR_CHECK( esp_event_loop_init(event_handler, NULL) );
+
 	wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
 
 	ESP_ERROR_CHECK( esp_wifi_init(&cfg) );
@@ -138,6 +159,8 @@ extern "C" void app_main(void)
 
 	auto mqtt_handle = esp_mqtt_client_init(&mqtt_cfg);
 	esp_mqtt_client_start(mqtt_handle);
+
+	I2CTest();
 
 	lightController = new NeoController(GPIO_NUM_14, RMT_CHANNEL_0, 20);
 
@@ -236,11 +259,6 @@ extern "C" void app_main(void)
 
 		uint32_t touchStatus = false;
 		while(true) {
-			vTaskDelay(2000);
-			printf("Switching system: %d\n", touchy.read_raw());
-		}
-
-		while(true) {
 			xTaskNotifyWait(0, 0, &touchStatus, portMAX_DELAY);
 			if(touchStatus) {
 				is_enabled = !is_enabled;
@@ -283,7 +301,7 @@ extern "C" void app_main(void)
 		tgtBackground.fill(currentSet.upperFace, 8, 15);
 		tgtBackground.fill(currentSet.lowerFace, 15, 18);
 		if((whoIs != 0) && (whoIs != 4))
-			tgtBackground.fill(0x555555, 18, 20);
+			tgtBackground.fill(0x606060, 18, 20);
 
 		tgtBackground.alpha = 2;
 
