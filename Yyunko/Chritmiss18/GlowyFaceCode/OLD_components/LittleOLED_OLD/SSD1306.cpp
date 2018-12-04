@@ -5,13 +5,13 @@
  *      Author: xasin
  */
 
-#include "SSD1306.h"
+#include <components/LittleOLED_OLD/include/SSD1306.h>
 
 namespace Peripheral {
 namespace OLED {
 
-#include "font-5x8.c"
-#include "font-6x8.c"
+#include <components/LittleOLED_OLD/font-5x8.c>
+#include <components/LittleOLED_OLD/font-6x8.c>
 
 SSD1306::SSD1306() :
 		currentAction(nullptr), cmdBuffer(),

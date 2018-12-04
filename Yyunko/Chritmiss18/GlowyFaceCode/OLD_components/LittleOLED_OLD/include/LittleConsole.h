@@ -12,11 +12,11 @@
 #include <cstring>
 #include <stdarg.h>
 
+#include "../../LittleOLED_OLD/include/SSD1306.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/semphr.h"
 
-#include "SSD1306.h"
 
 namespace Peripheral {
 namespace OLED {

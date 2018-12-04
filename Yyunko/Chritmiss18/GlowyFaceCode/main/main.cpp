@@ -1,4 +1,6 @@
 
+#include "LittleConsole.h"
+#include "SSD1306.h"
 #include <functional>
 #include <string.h>
 
@@ -17,9 +19,6 @@
 #include "Control.h"
 
 #include "ManeAnimator.h"
-
-#include "SSD1306.h"
-#include "LittleConsole.h"
 
 #include "WifiPasswd.h"
 

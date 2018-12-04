@@ -5,7 +5,7 @@
  *      Author: xasin
  */
 
-#include "LittleConsole.h"
+#include <components/LittleOLED_OLD/include/LittleConsole.h>
 
 namespace Peripheral {
 namespace OLED {
