@@ -59,8 +59,6 @@ void MasterAction::execute(i2c_port_t port) {
 	executed = true;
 	auto ret = i2c_master_cmd_begin(port, cmd, 1000);
 
-	printf("Error-code is: %s\n", esp_err_to_name(ret));
-
 	i2c_cmd_link_delete(cmd);
 }
 
