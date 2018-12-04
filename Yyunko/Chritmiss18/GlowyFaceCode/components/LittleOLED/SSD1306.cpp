@@ -11,10 +11,14 @@ namespace Peripheral {
 namespace OLED {
 
 #include "font-5x8.c"
+#include "font-6x8.c"
 
 SSD1306::SSD1306() :
 		currentAction(nullptr), cmdBuffer(),
 		screenBuffer() {
+}
+
+void SSD1306::initialize() {
 	start_cmd_set();
 
 	send_cmd(SET_MUX_RATIO, 31);
@@ -35,33 +39,32 @@ SSD1306::SSD1306() :
 
 	end_cmd_set();
 
-	set_pixel(64, 16);
-
-	write_string("Helu Wuff", 0, 0);
-	write_string("UwU.exe started", 10, 10, true);
-
 	push_entire_screen();
+
+	puts("SSD initialized!");
 }
 
-void SSD1306::start_cmd_set() {
+XaI2C::MasterAction* SSD1306::start_cmd_set() {
 	assert(currentAction == nullptr);
-	currentAction = new XaI2C::MasterAction(0b0111100);
+	this->currentAction = new XaI2C::MasterAction(0b0111100);
+
+	return currentAction;
 }
 
 void SSD1306::send_cmd(uint8_t cmdByte) {
-	assert(currentAction);
+	assert(currentAction != nullptr);
 
 	cmdBuffer.push_back(cmdByte);
 }
 void SSD1306::send_cmd(uint8_t cmdByte, uint8_t param) {
-	assert(currentAction);
+	assert(currentAction != nullptr);
 
 	cmdBuffer.push_back(cmdByte);
 	cmdBuffer.push_back(param);
 }
 
 void SSD1306::end_cmd_set() {
-	assert(currentAction);
+	assert(currentAction != nullptr);
 
 	currentAction->write(0x00, cmdBuffer.data(), cmdBuffer.size());
 
@@ -73,20 +76,19 @@ void SSD1306::end_cmd_set() {
 }
 
 void SSD1306::data_write(void *data, size_t length) {
-	printf("Pushing %d bytes to SSD1306!\n", length);
-
 	assert(currentAction == nullptr);
 
 	currentAction = new XaI2C::MasterAction(0b0111100);
 
 	currentAction->write(DATA_STREAM, data, length);
 	currentAction->execute();
+
 	delete currentAction;
 	currentAction = nullptr;
 }
 
 void SSD1306::set_coordinates(uint8_t column, uint8_t page, uint8_t maxColumn, uint8_t maxPage) {
-	start_cmd_set();
+	this->currentAction = start_cmd_set();
 
 	const char oData[] = {SET_COLUMN_RANGE, column, maxColumn, SET_PAGE_RANGE, page, maxPage};
 	for(uint8_t i=0; i<6; i++)
@@ -95,6 +97,12 @@ void SSD1306::set_coordinates(uint8_t column, uint8_t page, uint8_t maxColumn, u
 	end_cmd_set();
 }
 
+void SSD1306::clear() {
+	for(auto &page : screenBuffer) {
+		for(uint8_t i=0; i<page.size(); i++)
+			page[i] = 0;
+	}
+}
 void SSD1306::push_entire_screen() {
 	set_coordinates();
 
@@ -104,15 +112,15 @@ void SSD1306::push_entire_screen() {
 }
 
 void SSD1306::set_pixel(uint8_t x, uint8_t y, bool on) {
-	if(x >= 128)
-		return;
-	if(y >= 32)
-		return;
-
 	uint8_t page   = y / 8;
 	uint8_t page_y = y%8;
 
-	uint8_t &dByte = *(screenBuffer[page].begin() + x);
+	if(page >= screenBuffer.size())
+		return;
+	if(x >= screenBuffer[page].size())
+		return;
+
+	uint8_t &dByte = screenBuffer[page][x];
 
 	if(on)
 		dByte |= 1<<page_y;
@@ -129,8 +137,19 @@ void SSD1306::write_char(char c, uint8_t x, uint8_t y, bool invert) {
 	}
 }
 void SSD1306::write_string(std::string outString, uint8_t x, uint8_t y, bool invert) {
-	for(uint8_t dc = 0; dc<outString.size(); dc++)
-		write_char(outString[dc], x + 5*dc, y, invert);
+
+	uint8_t  dL  = 0;
+	uint16_t dLx = 0;
+
+	for(uint8_t dc = 0; dc<outString.size(); dc++) {
+		char next = outString[dc];
+		if(next == '\n') {
+			dL++;
+			dLx = x + 5*(1+dc);
+		}
+		else
+			write_char(outString[dc], x + 5*dc - dLx, y + 8*dL, invert);
+	}
 }
 
 } /* namespace OLED */

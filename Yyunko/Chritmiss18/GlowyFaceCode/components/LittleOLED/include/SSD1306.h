@@ -50,13 +50,13 @@ public:
 	};
 
 private:
-
 	XaI2C::MasterAction *currentAction;
+
 	std::vector<char> cmdBuffer;
 
 	std::array<std::array<uint8_t, 128>, 4> screenBuffer;
 
-	void start_cmd_set();
+	XaI2C::MasterAction* start_cmd_set();
 
 	void send_cmd(uint8_t cmdVal);
 	void send_cmd(uint8_t cmdVal, uint8_t extraByte);
@@ -69,8 +69,11 @@ public:
 
 	SSD1306();
 
+	void initialize();
+
 	void set_coordinates(uint8_t column = 0, uint8_t page = 0, uint8_t maxColumn = 127, uint8_t maxPage = 3);
 
+	void clear();
 	void push_entire_screen();
 
 	void set_pixel(uint8_t x, uint8_t y, bool on = true);
