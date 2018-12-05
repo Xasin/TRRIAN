@@ -34,7 +34,10 @@ volatile bool  is_enabled = true;
 volatile uint8_t whoIs = 0;
 
 OLED::SSD1306 screen = OLED::SSD1306();
-OLED::LittleConsole console(screen);
+OLED::DrawBox testBox(32, 32, &screen);
+
+OLED::LittleConsole console(testBox);
+
 
 char *vsprintfBuffer = new char[255];
 

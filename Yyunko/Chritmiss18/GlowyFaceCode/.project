@@ -24,4 +24,17 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>XASCODE_PATH</name>
+			<type>2</type>
+			<locationURI>XASCODE_PATH</locationURI>
+		</link>
+	</linkedResources>
+	<variableList>
+		<variable>
+			<name>XASCODE_PATH</name>
+			<value>file:/home/xasin/XasWorks/XasCode/ESP32</value>
+		</variable>
+	</variableList>
 </projectDescription>
