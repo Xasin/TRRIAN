@@ -18,6 +18,8 @@
 #include "NeoController.h"
 #include "Control.h"
 
+#include "DrawBox.h"
+
 #include "ManeAnimator.h"
 
 #include "WifiPasswd.h"
@@ -34,27 +36,47 @@ volatile bool  is_enabled = true;
 volatile uint8_t whoIs = 0;
 
 OLED::SSD1306 screen = OLED::SSD1306();
-OLED::DrawBox testBox(32, 32, &screen);
+OLED::DrawBox *testBox = nullptr;
 
-OLED::LittleConsole console(testBox);
+OLED::DrawBox testBattery = OLED::DrawBox(7, 5, &screen);
+
+OLED::LittleConsole *console;
 
 
 char *vsprintfBuffer = new char[255];
 
+void drawBattery() {
+	for(uint8_t x = 1; x<7; x++) {
+		testBattery.set_pixel(x, 0);
+		testBattery.set_pixel(x, 4);
+	}
+	for(uint8_t y=1; y<4; y++) {
+		testBattery.set_pixel(0, y);
+		testBattery.set_pixel(1, y);
+		testBattery.set_pixel(6, y);
+	}
+}
+
 int vprintf_like(const char *input, va_list args) {
 	int printedLength = vsprintf(vsprintfBuffer, input, args);
 
-	console.printf(vsprintfBuffer + 8);
+	console->printf(vsprintfBuffer + 8);
 	return printedLength;
 }
 
 void I2CTest() {
 	XaI2C::MasterAction::init(GPIO_NUM_25, GPIO_NUM_26);
 
+	testBattery.offsetX = 110;
+	testBattery.onRedraw = drawBattery;
+
+	testBox = new OLED::DrawBox(100, 32, &screen);
+	console = new OLED::LittleConsole(*testBox);
+
 	screen.initialize();
 
 	for(uint8_t i=0; i<11; i++) {
-		console.printf("Test no. %d!\n", i);
+		console->printf("Test no. %d!\n", i);
 
 		vTaskDelay(200);
 	}
