@@ -38,7 +38,7 @@ volatile uint8_t whoIs = 0;
 OLED::SSD1306 screen = OLED::SSD1306();
 OLED::DrawBox *testBox = nullptr;
 
-OLED::DrawBox testBattery = OLED::DrawBox(7, 5, &screen);
+OLED::DrawBox testBattery = OLED::DrawBox(8, 6, &screen);
 
 OLED::LittleConsole *console;
 
@@ -46,14 +46,9 @@ OLED::LittleConsole *console;
 char *vsprintfBuffer = new char[255];
 
 void drawBattery() {
-	for(uint8_t x = 1; x<7; x++) {
-		testBattery.set_pixel(x, 0);
-		testBattery.set_pixel(x, 4);
-	}
-	for(uint8_t y=1; y<4; y++) {
+	testBattery.draw_box(1, 0, 5, 8, false);
+	for(uint8_t y=1; y<5; y++) {
 		testBattery.set_pixel(0, y);
-		testBattery.set_pixel(1, y);
-		testBattery.set_pixel(6, y);
 	}
 }
 
