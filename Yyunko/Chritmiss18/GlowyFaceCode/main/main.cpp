@@ -45,11 +45,15 @@ OLED::LittleConsole *console;
 
 char *vsprintfBuffer = new char[255];
 
+uint8_t drawBatVal = 0;
 void drawBattery() {
-	testBattery.draw_box(1, 0, 5, 8, false);
-	for(uint8_t y=1; y<5; y++) {
-		testBattery.set_pixel(0, y);
+	testBattery.draw_box(1, 0, 7, 6, false);
+	testBattery.draw_line(0, 1, 4, 1);
+
+	for(uint8_t i=0; i<(4*5); i++) {
+		testBattery.set_pixel(6 - i/4, 1+(i%4), i<drawBatVal);
 	}
+	drawBatVal = (drawBatVal+1) % (4*5);
 }
 
 int vprintf_like(const char *input, va_list args) {
