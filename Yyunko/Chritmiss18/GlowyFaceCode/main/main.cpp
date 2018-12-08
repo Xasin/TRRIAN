@@ -20,6 +20,8 @@
 
 #include "DrawBox.h"
 
+#include "SSegDisplay.h"
+
 #include "ManeAnimator.h"
 
 #include "WifiPasswd.h"
@@ -38,8 +40,9 @@ volatile uint8_t whoIs = 0;
 OLED::SSD1306 screen = OLED::SSD1306();
 OLED::DrawBox *testBox = nullptr;
 
-OLED::DrawBox testBattery = OLED::DrawBox(8, 6, &screen);
+SSegDisplay testSegment(screen);
 
+OLED::DrawBox testBattery = OLED::DrawBox(8, 6, &screen);
 OLED::LittleConsole *console;
 
 
@@ -54,6 +57,9 @@ void drawBattery() {
 		testBattery.set_pixel(6 - i/4, 1+(i%4), i<drawBatVal);
 	}
 	drawBatVal = (drawBatVal+1) % (4*5);
+
+	testSegment.draw_number((drawBatVal/10), 0);
+	testSegment.draw_number((drawBatVal % 10), 1);
 }
 
 int vprintf_like(const char *input, va_list args) {
@@ -70,6 +76,7 @@ void I2CTest() {
 	testBattery.onRedraw = drawBattery;
 
 	testBox = new OLED::DrawBox(100, 32, &screen);
+	testBox->visible = false;
 	console = new OLED::LittleConsole(*testBox);
 
 	screen.initialize();
