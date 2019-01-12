@@ -26,6 +26,30 @@
 
 #include "WifiPasswd.h"
 
+struct FaceConfig {
+	int totalLength;
+	int maneEnd;
+	int upperFaceEnd;
+	int lowerFaceEnd;
+};
+
+const FaceConfig faces[] = {
+		{
+				20,
+				8,
+				15,
+				18,
+		},
+		{
+				14,
+				7,
+				11,
+				13
+		}
+};
+
+FaceConfig currentFace = faces[FACE_NUM];
+
 using namespace Peripheral;
 using namespace XaI2C;
 
@@ -125,12 +149,12 @@ esp_err_t mqtt_evt_handle(esp_mqtt_event_handle_t event) {
 	case MQTT_EVENT_CONNECTED:
 		puts("MQTT connected!");
 
-		esp_mqtt_client_subscribe(event->client, "Personal/Yyunko/XaHead/#", 1);
-		esp_mqtt_client_publish(event->client, "Personal/Yyunko/XaHead/Connected", "OK", 3, 1, true);
+		esp_mqtt_client_subscribe(event->client, (std::string("Personal/") + FACE_NAME + "/XaHead/#").data(), 1);
+		esp_mqtt_client_publish(event->client, (std::string("Personal/") + FACE_NAME + "/XaHead/Connected").data(), "OK", 3, 1, true);
 	break;
 	case MQTT_EVENT_DATA: {
 		std::string topic(event->topic, event->topic_len);
-		if(topic == "Personal/Yyunko/XaHead/Who") {
+		if(topic == std::string("Personal/") + FACE_NAME "/XaHead/Who") {
 			MQTT_whoIs = 0;
 
 			std::string whoIs(event->data, event->data_len);
@@ -183,16 +207,16 @@ extern "C" void app_main(void)
 	mqtt_cfg.event_handle = mqtt_evt_handle;
 	mqtt_cfg.uri = "mqtt://iot.eclipse.org";
 
-	mqtt_cfg.lwt_topic = "Personal/Yyunko/XaHead/Connected";
+	mqtt_cfg.lwt_topic = (std::string("Personal/") + FACE_NAME + "/XaHead/Connected").data();
 	mqtt_cfg.lwt_msg_len = 0;
 	mqtt_cfg.lwt_retain = true;
 
 	auto mqtt_handle = esp_mqtt_client_init(&mqtt_cfg);
 	esp_mqtt_client_start(mqtt_handle);
 
-	I2CTest();
+	//I2CTest();
 
-	lightController = new NeoController(GPIO_NUM_14, RMT_CHANNEL_0, 20);
+	lightController = new NeoController(GPIO_NUM_14, RMT_CHANNEL_0, currentFace.totalLength);
 
 	struct ColorSet {
 		Color maneTop;
@@ -237,21 +261,21 @@ extern "C" void app_main(void)
 
 	lightController->fill(0);
 
-	ManeAnimator mane(8);
+	ManeAnimator mane(currentFace.maneEnd);
 	mane.wrap = false;
 	mane.basePoint = 0.4;
 
-	Layer tgtBackground(20);
+	Layer tgtBackground(currentFace.totalLength);
 	tgtBackground.alpha = 12;
-	Layer smBackground(20);
+	Layer smBackground(currentFace.totalLength);
 	smBackground.fill(0);
 
-	Layer tgtManeForeground(8);
+	Layer tgtManeForeground(currentFace.maneEnd);
 	tgtManeForeground.alpha = 15;
 
-	Layer smManeForeground(8);
+	Layer smManeForeground(currentFace.maneEnd);
 	smManeForeground.alpha = 190;
-	Layer animManeForeground(8);
+	Layer animManeForeground(currentFace.maneEnd);
 	animManeForeground.alpha = 150;
 
 	std::function<void(void)> animatorLambda = [&]() {
@@ -311,7 +335,7 @@ extern "C" void app_main(void)
 	unsigned int whoIsBuffer = MQTT_whoIs;
 
 	while (true) {
-		tgtBackground.fill(0, 8, 20);
+		tgtBackground.fill(0, currentFace.maneEnd, currentFace.totalLength);
 		tgtBackground.alpha = 2;
 		vTaskDelay(2000/portTICK_PERIOD_MS);
 		tgtBackground.alpha = 12;
@@ -328,10 +352,10 @@ extern "C" void app_main(void)
 			vTaskDelay(200/portTICK_PERIOD_MS);
 		}
 
-		tgtBackground.fill(currentSet.upperFace, 8, 15);
-		tgtBackground.fill(currentSet.lowerFace, 15, 18);
+		tgtBackground.fill(currentSet.upperFace, currentFace.maneEnd, currentFace.upperFaceEnd);
+		tgtBackground.fill(currentSet.lowerFace, currentFace.upperFaceEnd, currentFace.lowerFaceEnd);
 		if((whoIs != 0) && (whoIs != 4))
-			tgtBackground.fill(0x606060, 18, 20);
+			tgtBackground.fill(0x606060, currentFace.lowerFaceEnd, currentFace.totalLength);
 
 		tgtBackground.alpha = 2;
 
