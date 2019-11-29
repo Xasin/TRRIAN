@@ -943,4 +943,15 @@ Wire Wire Line
 	10475 2225 10625 2225
 Wire Wire Line
 	10625 2225 10625 2175
+$Comp
+L Graphic:SYM_Radioactive_Large SYM1
+U 1 1 5DE0498B
+P 2700 6025
+F 0 "SYM1" H 2795 6305 50  0001 C CNN
+F 1 "SYM_Radioactive_Large" H 2795 5855 50  0001 C CNN
+F 2 "Local:DragonIcon" H 2795 5905 50  0001 C CNN
+F 3 "~" H 2825 5905 50  0001 C CNN
+	1    2700 6025
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
