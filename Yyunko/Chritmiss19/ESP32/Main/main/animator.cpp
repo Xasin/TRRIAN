@@ -28,8 +28,7 @@ Color chevron_base = Color(0);
 Color chevron_base_target = Color(0);
 
 Layer all_chevrons = Layer(CHEVRON_SYM_COUNT);
-Layer smoothed_chevrons = Layer(CHEVRON_SYM_COUNT);
-Layer target_chevrons   = Layer(CHEVRON_SYM_COUNT);
+Layer active_chevrons   = Layer(CHEVRON_SYM_COUNT);
 
 TickType_t next_chevron_tick = 0;
 
@@ -39,16 +38,13 @@ int chevron_move_count = 0;
 bool chevron_dir = false;
 
 void init_chevrons() {
-	target_chevrons.alpha = 30;
 }
 
 void draw_chevrons() {
-	chevron_base.merge_overlay(chevron_base_target);
+	chevron_base.merge_transition(chevron_base_target, 1000);
 
-	smoothed_chevrons.merge_overlay(target_chevrons);
 	all_chevrons.fill(chevron_base);
-
-	all_chevrons = smoothed_chevrons;
+	//all_chevrons.merge_overlay(active_chevrons);
 
 	if(tgt_chevron_pos == -1)
 		return;
@@ -71,13 +67,13 @@ void draw_chevrons() {
 			chevron_dir ^= 1;
 			chevron_move_count = 0;
 
-			target_chevrons[last_chevron_pos] = Color(Material::BLUE, 80);
+			active_chevrons[last_chevron_pos] = Color(Material::BLUE, 255, 80);
 		}
 	}
 }
 void clear_chevrons() {
-	target_chevrons.fill(Color(0, 0, 20));
-	chevron_base_target = Color(Material::CYAN, 40, 3);
+	active_chevrons.fill(Color(Material::BLUE, 255, 0));
+	chevron_base_target = Color(Material::CYAN, 255, 0);
 
 	tgt_chevron_pos = -1;
 	last_chevron_pos = 0;
@@ -87,14 +83,14 @@ void clear_chevrons() {
 }
 
 void all_chevrons_soft() {
-	chevron_base_target = Color(0, 0, 2);
+	chevron_base_target = Color(Material::CYAN, 255, 80);
 }
 
 void anim_thread(void *args) {
 	ESP_LOGI("Anim", "Thread started!");
 
 	while(true) {
-		vTaskDelay(20);
+		vTaskDelay(10);
 		HW::raw_leds.colors.fill(0);
 
 		draw_chevrons();
