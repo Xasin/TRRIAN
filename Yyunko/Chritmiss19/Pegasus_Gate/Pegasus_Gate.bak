@@ -842,21 +842,6 @@ F 3 "" H 3950 2100 50  0001 C CNN
 	1    3950 2100
 	1    0    0    -1  
 $EndComp
-$Comp
-L Device:Jumper_NC_Small JP1
-U 1 1 5DE11BC5
-P 3750 2375
-F 0 "JP1" H 3750 2587 50  0000 C CNN
-F 1 "Jumper_NC_Small" H 3750 2496 50  0000 C CNN
-F 2 "Jumper:SolderJumper-2_P1.3mm_Bridged_Pad1.0x1.5mm" H 3750 2375 50  0001 C CNN
-F 3 "~" H 3750 2375 50  0001 C CNN
-	1    3750 2375
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	3600 2375 3650 2375
-Wire Wire Line
-	3850 2375 4050 2375
 Wire Wire Line
 	4775 1550 4425 1550
 Text Label 4425 1550 0    50   ~ 0
@@ -944,14 +929,16 @@ Wire Wire Line
 Wire Wire Line
 	10625 2225 10625 2175
 $Comp
-L Graphic:SYM_Radioactive_Large #SYM?
+L Graphic:SYM_Radioactive_Large SYM1
 U 1 1 5DE0498B
 P 2700 6025
-F 0 "#SYM?" H 2795 6305 50  0001 C CNN
+F 0 "SYM1" H 2795 6305 50  0001 C CNN
 F 1 "SYM_Radioactive_Large" H 2795 5855 50  0001 C CNN
 F 2 "Local:DragonIcon" H 2795 5905 50  0001 C CNN
 F 3 "~" H 2825 5905 50  0001 C CNN
 	1    2700 6025
 	1    0    0    -1  
 $EndComp
+Wire Wire Line
+	3600 2375 4050 2375
 $EndSCHEMATC
