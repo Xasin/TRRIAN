@@ -28,7 +28,7 @@ extern "C" void app_main(void)
     esp_timer_init();
 
     esp_pm_config_esp32_t power_config = {};
-    power_config.max_freq_mhz = 80;
+    power_config.max_freq_mhz = 240;
 	power_config.min_freq_mhz = 80;
 	power_config.light_sleep_enable = false;
     esp_pm_configure(&power_config);

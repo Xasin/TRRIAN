@@ -38,13 +38,15 @@ int chevron_move_count = 0;
 bool chevron_dir = false;
 
 void init_chevrons() {
+	active_chevrons.fill(Color(Material::BLUE, 255, 0));
+	chevron_base_target = Color(Material::CYAN, 255, 0);
 }
 
 void draw_chevrons() {
-	chevron_base.merge_transition(chevron_base_target, 1000);
+	chevron_base.merge_transition(chevron_base_target, 2000);
 
 	all_chevrons.fill(chevron_base);
-	//all_chevrons.merge_overlay(active_chevrons);
+	all_chevrons.merge_overlay(active_chevrons);
 
 	if(tgt_chevron_pos == -1)
 		return;
@@ -73,7 +75,7 @@ void draw_chevrons() {
 }
 void clear_chevrons() {
 	active_chevrons.fill(Color(Material::BLUE, 255, 0));
-	chevron_base_target = Color(Material::CYAN, 255, 0);
+	chevron_base_target = Color(Material::CYAN, 80, 0);
 
 	tgt_chevron_pos = -1;
 	last_chevron_pos = 0;
@@ -83,14 +85,14 @@ void clear_chevrons() {
 }
 
 void all_chevrons_soft() {
-	chevron_base_target = Color(Material::CYAN, 255, 80);
+	chevron_base_target = Color(Material::CYAN, 80, 200);
 }
 
 void anim_thread(void *args) {
 	ESP_LOGI("Anim", "Thread started!");
 
 	while(true) {
-		vTaskDelay(10);
+		vTaskDelay(20);
 		HW::raw_leds.colors.fill(0);
 
 		draw_chevrons();
@@ -101,6 +103,8 @@ void anim_thread(void *args) {
 }
 
 void init() {
+	init_chevrons();
+
 	xTaskCreate(anim_thread, "SG::Anim", 10*1024, nullptr, 10, nullptr);
 }
 
