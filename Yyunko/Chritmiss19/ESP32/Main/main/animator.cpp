@@ -92,12 +92,15 @@ void anim_thread(void *args) {
 	ESP_LOGI("Anim", "Thread started!");
 
 	while(true) {
-		vTaskDelay(20);
-		HW::raw_leds.colors.fill(0);
+		vTaskDelay(2000);
+		Color tColor = Material::RED;
+		printf("Color is: %0X\n", tColor.getPrintable());
 
-		draw_chevrons();
+		HW::raw_leds.colors.fill(tColor);
 
-		HW::raw_leds.colors.merge_overlay(all_chevrons);
+		//draw_chevrons();
+		//HW::raw_leds.colors.merge_overlay(all_chevrons);
+
 		HW::raw_leds.update();
 	}
 }
