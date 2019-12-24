@@ -16,6 +16,7 @@
 
 esp_err_t event_handler(void *ctx, system_event_t *event)
 {
+	 SG::HW::esp_evt_handler(event);
     return ESP_OK;
 }
 
@@ -28,33 +29,23 @@ extern "C" void app_main(void)
     esp_timer_init();
 
     esp_pm_config_esp32_t power_config = {};
-    power_config.max_freq_mhz = 240;
-	power_config.min_freq_mhz = 80;
+    power_config.max_freq_mhz = 120;
+	power_config.min_freq_mhz = 120;
 	power_config.light_sleep_enable = false;
     esp_pm_configure(&power_config);
 
     printf("Heap is %d\n", xPortGetFreeHeapSize());
 
+    SG::HW::init();
     SG::Animator::init();
 
-    printf("Heap is %d\n", xPortGetFreeHeapSize());
+    Peripheral::Color::test_color();
 
     int i = 0;
     while (true) {
-    	while(SG::Animator::tgt_chevron_pos != -1) {
-    		vTaskDelay(1);
-    	}
-    	if(i == 4) {
-    		SG::Animator::all_chevrons_soft();
-    		vTaskDelay(3000);
-    		SG::Animator::clear_chevrons();
-    		i = 0;
-    	}
-    	vTaskDelay(500);
+    	auto t = SG::HW::get_time();
 
-    	SG::Animator::tgt_chevron_pos = esp_random() % 16;
-    	printf("TGT Chevron at %d\n", SG::Animator::tgt_chevron_pos);
-    	i++;
-    }
+        printf("Time is: %d:%02d:%02d\n", t->tm_hour, t->tm_min, t->tm_sec);
+        vTaskDelay(50000);
+	 }
 }
-

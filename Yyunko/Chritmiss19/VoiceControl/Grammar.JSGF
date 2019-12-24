@@ -1,0 +1,6 @@
+#JSGF V1.0;
+grammar MainControl;
+
+<commands> = authorize activation | initiate dialing sequence | close wormhole;
+
+public <commandSequence> = computer <commands>;

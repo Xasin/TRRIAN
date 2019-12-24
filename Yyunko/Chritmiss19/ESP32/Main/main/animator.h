@@ -8,13 +8,14 @@
 #ifndef MAIN_ANIMATOR_H_
 #define MAIN_ANIMATOR_H_
 
+#include "animation/chevron_handling.h"
+#include "animation/dial_alert.h"
+#include "animation/clock.h"
+
+#include "animation/gate_handling.h"
+
 namespace SG {
 namespace Animator {
-
-extern int tgt_chevron_pos;
-
-void clear_chevrons();
-void all_chevrons_soft();
 
 void init();
 
