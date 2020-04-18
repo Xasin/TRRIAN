@@ -2,8 +2,6 @@
 require 'midilib/io/seqreader'
 require 'midilib/sequence.rb'
 
-# Beep
-
 ### Structure of the output:
 # 1 byte note-type.
 # 1 byte volume
