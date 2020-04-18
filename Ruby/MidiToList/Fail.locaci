@@ -9,6 +9,6 @@ new_block do |b|
 
 	b.step do |files|
 		puts "I am seeing files #{files}!"
-		cmd 'exit 0'
+		cmd 'exit -10'
 	end
 end
