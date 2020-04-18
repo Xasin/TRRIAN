@@ -1,0 +1,14 @@
+
+new_block do |b|
+	b.name = 'Maybe Fails'
+	b.description = 'Self-testing minitest exection'
+
+	b.directory = '../';
+
+	b.watch(/\.rb$/)
+
+	b.step do |files|
+		puts "I am seeing files #{files}!"
+		cmd 'exit 0'
+	end
+end
